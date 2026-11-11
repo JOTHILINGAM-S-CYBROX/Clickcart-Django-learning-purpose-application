@@ -1,0 +1,44 @@
+{% extends 'landingpage/base.html' %}
+
+{% block title %}Clickcart Plus Membership | Clickcart{% endblock %}
+
+{% block content %}
+<div class="cc-container" style="padding-top:16px;">
+  <div class="cc-card" style="background:linear-gradient(135deg,#0F172A 0%,#1E3A8A 60%,#2874F0 100%);color:#FFF;padding:34px 28px;text-align:center;">
+    <div style="display:inline-block;background:#FFE500;color:#212121;font-weight:800;font-size:12px;padding:4px 12px;border-radius:99px;margin-bottom:10px;">
+      ★ CLICKCART PLUS LOYALTY PROGRAM
+    </div>
+    <h1 style="margin:0 0 10px;font-size:32px;">Shop Like a VIP. Zero Delivery Fees.</h1>
+    <p style="max-width:620px;margin:0 auto 20px;color:#DBEAFE;font-size:15px;">
+      Enjoy Free Priority Delivery on every order, 2x SuperCoins rewards, Early Access to Big Saving Days, and exclusive 20% off coupons.
+    </p>
+
+    {% if cc_user.is_plus_member %}
+      <div style="display:inline-block;background:#16A34A;color:#FFF;padding:10px 22px;border-radius:4px;font-weight:700;">
+        ✓ Clickcart Plus is ACTIVE on your account!
+      </div>
+    {% else %}
+      <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="cc-btn cc-btn-amber cc-btn-lg">Activate Clickcart Plus (Free Trial)</button>
+      </form>
+    {% endif %}
+  </div>
+
+  <div class="cc-bank-grid" style="margin-top:16px;">
+    <div class="cc-card" style="padding:20px;">
+      <h3 style="margin:0 0 8px;">🚚 Free Priority Delivery</h3>
+      <p style="margin:0;color:#555;font-size:13.5px;">Never pay ₹40 delivery fee — even on orders below ₹499 across India.</p>
+    </div>
+    <div class="cc-card" style="padding:20px;">
+      <h3 style="margin:0 0 8px;">🪙 2x SuperCoins Multiplier</h3>
+      <p style="margin:0;color:#555;font-size:13.5px;">Earn double SuperCoins on every purchase and redeem for instant checkout discounts.</p>
+    </div>
+    <div class="cc-card" style="padding:20px;">
+      <h3 style="margin:0 0 8px;">🏷 Exclusive PLUS20 Coupon</h3>
+      <p style="margin:0;color:#555;font-size:13.5px;">Unlock 20% off (up to ₹2,500) on orders above ₹1,499 with code <strong>PLUS20</strong>.</p>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

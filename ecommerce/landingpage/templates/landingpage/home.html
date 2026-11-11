@@ -1,0 +1,149 @@
+{% extends 'landingpage/base.html' %}
+{% load static %}
+
+{% block subnav %}
+<div class="cc-cat-bar">
+  <div class="cc-container cc-cat-strip">
+    {% for cat in categories %}
+      <a href="{% url 'product_list' %}?category={{ cat.slug }}" class="cc-cat-item">
+        <img src="{% static cat.icon_image %}" alt="{{ cat.name }}" />
+        <span>{{ cat.name }}</span>
+      </a>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="cc-container" style="padding-top:4px;">
+
+  <!-- Hero Banner Carousel -->
+  <div class="cc-carousel">
+    <div id="heroCarouselTrack" class="cc-carousel-track">
+      {% for b in hero_banners %}
+        <a href="{{ b.target_url }}" class="cc-carousel-slide">
+          <img src="{% static b.image_path %}" alt="{{ b.title }}" />
+        </a>
+      {% endfor %}
+    </div>
+    <button type="button" id="heroPrev" class="cc-carousel-btn prev" aria-label="Previous Slide">‹</button>
+    <button type="button" id="heroNext" class="cc-carousel-btn next" aria-label="Next Slide">›</button>
+    <div class="cc-carousel-dots">
+      {% for b in hero_banners %}
+        <button type="button" class="cc-carousel-dot {% if forloop.first %}active{% endif %}" aria-label="Slide {{ forloop.counter }}"></button>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Bank & SuperCoins Offer Strip -->
+  <div class="cc-bank-grid">
+    {% for offer in bank_offers %}
+      <div class="cc-bank-card" style="border-left-color:{{ offer.color }};">
+        <span class="cc-bank-badge" style="background:{{ offer.color }};">{{ offer.badge }}</span>
+        <div style="font-weight:700;font-size:15px;margin-bottom:4px;">{{ offer.bank }}</div>
+        <div style="font-size:12.5px;color:#555;">{{ offer.detail }}</div>
+      </div>
+    {% endfor %}
+  </div>
+
+  <!-- Deals of the Day with Live Timer -->
+  <section class="cc-card">
+    <div class="cc-section-head">
+      <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+        <h2 class="cc-section-title">Deals of the Day</h2>
+        <span class="cc-timer-pill">⏱ <span id="dealCountdown">05h : 42m : 18s Left</span></span>
+      </div>
+      <a href="{% url 'product_list' %}?deal=1" class="cc-btn cc-btn-blue cc-btn-sm">VIEW ALL</a>
+    </div>
+    <div class="cc-prod-grid">
+      {% for p in deals_of_day %}
+        {% include 'landingpage/partials_product_card.html' with p=p %}
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- Active Coupon Strip -->
+  <section class="cc-card" style="padding:14px 20px;background:linear-gradient(90deg,#EFF6FF 0%,#FFFBEB 100%);">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+      <div>
+        <div style="font-weight:800;font-size:15px;color:#1E3A8A;">🏷 Extra Savings with Clickcart Coupons</div>
+        <div style="font-size:12.5px;color:#4B5563;">Apply these promo codes directly inside your Shopping Cart:</div>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        {% for c in coupons %}
+          <span style="background:#FFFFFF;border:1.5px dashed #2874F0;padding:5px 10px;border-radius:4px;font-size:12px;font-weight:700;color:#2874F0;">
+            {{ c.code }} · {{ c.title }}
+          </span>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  <!-- Top 5G Smartphones -->
+  <section class="cc-card">
+    <div class="cc-section-head">
+      <h2 class="cc-section-title">Top 5G Smartphones & Tablets</h2>
+      <a href="{% url 'product_list' %}?category=mobiles" class="cc-btn cc-btn-blue cc-btn-sm">VIEW ALL</a>
+    </div>
+    <div class="cc-prod-grid">
+      {% for p in top_mobiles %}
+        {% include 'landingpage/partials_product_card.html' with p=p %}
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- Best of Electronics -->
+  <section class="cc-card">
+    <div class="cc-section-head">
+      <h2 class="cc-section-title">Best of Electronics & Audio</h2>
+      <a href="{% url 'product_list' %}?category=electronics" class="cc-btn cc-btn-blue cc-btn-sm">VIEW ALL</a>
+    </div>
+    <div class="cc-prod-grid">
+      {% for p in best_electronics %}
+        {% include 'landingpage/partials_product_card.html' with p=p %}
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- Fashion Bestsellers -->
+  <section class="cc-card">
+    <div class="cc-section-head">
+      <h2 class="cc-section-title">Fashion Top Deals</h2>
+      <a href="{% url 'product_list' %}?category=fashion" class="cc-btn cc-btn-blue cc-btn-sm">VIEW ALL</a>
+    </div>
+    <div class="cc-prod-grid">
+      {% for p in fashion_picks %}
+        {% include 'landingpage/partials_product_card.html' with p=p %}
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- Home, Appliances & Kitchen -->
+  <section class="cc-card">
+    <div class="cc-section-head">
+      <h2 class="cc-section-title">Smart Appliances & Home Upgrade</h2>
+      <a href="{% url 'product_list' %}?category=appliances" class="cc-btn cc-btn-blue cc-btn-sm">VIEW ALL</a>
+    </div>
+    <div class="cc-prod-grid">
+      {% for p in appliances_home %}
+        {% include 'landingpage/partials_product_card.html' with p=p %}
+      {% endfor %}
+    </div>
+  </section>
+
+  {% if recently_viewed %}
+  <section class="cc-card">
+    <div class="cc-section-head">
+      <h2 class="cc-section-title">Recently Viewed by You</h2>
+      <a href="{% url 'product_list' %}" class="cc-btn cc-btn-outline cc-btn-sm">Browse All</a>
+    </div>
+    <div class="cc-prod-grid">
+      {% for p in recently_viewed %}
+        {% include 'landingpage/partials_product_card.html' with p=p %}
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+</div>
+{% endblock %}

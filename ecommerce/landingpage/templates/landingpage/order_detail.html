@@ -1,0 +1,108 @@
+{% extends 'landingpage/base.html' %}
+{% load static %}
+
+{% block title %}Order #{{ order.order_number }} | Clickcart{% endblock %}
+
+{% block content %}
+<div class="cc-container" style="padding-top:14px;">
+  <div style="margin-bottom:10px;font-size:13px;">
+    <a href="{% url 'orders' %}" style="color:#2874F0;font-weight:600;">← Back to My Orders</a>
+  </div>
+
+  <!-- Order Tracking Card -->
+  <div class="cc-card" style="padding:20px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;padding-bottom:14px;border-bottom:1px solid #F0F0F0;">
+      <div>
+        <h1 style="margin:0;font-size:20px;">Order #{{ order.order_number }}</h1>
+        <div style="font-size:12.5px;color:#666;margin-top:4px;">Placed on {{ order.created_at }} · Payment: {{ order.payment_method }} ({{ order.payment_status }})</div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <a href="{% url 'order_invoice' order.order_number %}" class="cc-btn cc-btn-outline cc-btn-sm">📄 Tax Invoice</a>
+        {% if step_idx >= 0 and step_idx < 5 %}
+          <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="advance_status" />
+            <button type="submit" class="cc-btn cc-btn-blue cc-btn-sm">Simulate Next Delivery Step →</button>
+          </form>
+        {% endif %}
+      </div>
+    </div>
+
+    {% if order.status == 'CANCELLED' %}
+      <div style="margin:18px 0;padding:14px;background:#FEF2F2;border:1px solid #FECACA;border-radius:4px;color:#991B1B;font-weight:600;">
+        ✕ Order Cancelled — Reason: {{ order.cancellation_reason }}. Payment Status: {{ order.payment_status }}.
+      </div>
+    {% elif order.status == 'RETURN_REQUESTED' %}
+      <div style="margin:18px 0;padding:14px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:4px;color:#92400E;font-weight:600;">
+        ↩ Return Pickup Scheduled — Reason: {{ order.return_reason }}.
+      </div>
+    {% else %}
+      <div class="cc-stepper">
+        {% for code, label in steps %}
+          <div class="cc-step {% if forloop.counter0 < step_idx %}done{% elif forloop.counter0 == step_idx %}current{% endif %}">
+            <div class="cc-step-dot">{% if forloop.counter0 <= step_idx %}✓{% else %}{{ forloop.counter }}{% endif %}</div>
+            <div class="cc-step-label">{{ label }}</div>
+          </div>
+        {% endfor %}
+      </div>
+      <div style="text-align:center;font-size:13px;color:#388E3C;font-weight:700;">
+        {{ order.estimated_delivery }}
+      </div>
+    {% endif %}
+  </div>
+
+  <div class="cc-two-col">
+    <!-- Order Items & Actions -->
+    <div class="cc-card" style="padding:18px 20px;">
+      <h3 style="margin:0 0 12px;font-size:16px;">Items in this Order</h3>
+      {% for it in order.items %}
+      <div style="display:flex;gap:14px;align-items:center;padding:12px 0;border-bottom:1px solid #F3F4F6;">
+        <img src="{% static it.image %}" alt="" style="width:68px;height:68px;object-fit:contain;" />
+        <div style="flex:1;">
+          <div style="font-weight:600;">{{ it.title }}</div>
+          <div style="font-size:12.5px;color:#666;">Qty: {{ it.quantity }} {% if it.variant_label %}· {{ it.variant_label }}{% endif %}</div>
+          {% if it.with_exchange %}<div style="font-size:12px;color:#388E3C;">Exchange Bonus: -₹{{ it.exchange_discount }}</div>{% endif %}
+        </div>
+        <div style="font-weight:700;">₹{{ it.line_total }}</div>
+      </div>
+      {% endfor %}
+
+      {% if order.status in 'PLACED CONFIRMED PACKED SHIPPED' %}
+      <form method="post" style="margin-top:16px;padding-top:14px;border-top:1px solid #F0F0F0;display:flex;gap:8px;flex-wrap:wrap;">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="cancel_order" />
+        <input type="text" name="reason" placeholder="Cancellation reason (optional)" class="cc-input" style="max-width:280px;" />
+        <button type="submit" class="cc-btn cc-btn-outline" style="color:#D32F2F;border-color:#FCA5A5;">Cancel Order</button>
+      </form>
+      {% elif order.status == 'DELIVERED' %}
+      <form method="post" style="margin-top:16px;padding-top:14px;border-top:1px solid #F0F0F0;display:flex;gap:8px;flex-wrap:wrap;">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="return_order" />
+        <input type="text" name="reason" placeholder="Return reason (e.g., Size issue / Damaged)" class="cc-input" style="max-width:280px;" />
+        <button type="submit" class="cc-btn cc-btn-outline">Request Return</button>
+      </form>
+      {% endif %}
+    </div>
+
+    <!-- Shipping & Total -->
+    <div>
+      <div class="cc-card" style="padding:16px 20px;">
+        <h4 style="margin:0 0 8px;font-size:14px;color:#878787;text-transform:uppercase;">Delivery Address</h4>
+        <div style="font-weight:700;">{{ order.shipping_name }}</div>
+        <div style="font-size:13px;color:#444;margin-top:4px;">{{ order.shipping_address }}, {{ order.shipping_city }}, {{ order.shipping_state }} - {{ order.shipping_pincode }}</div>
+        <div style="font-size:13px;margin-top:4px;">Phone: {{ order.shipping_phone }}</div>
+      </div>
+
+      <div class="cc-card" style="padding:16px 20px;">
+        <h4 style="margin:0 0 8px;font-size:14px;color:#878787;text-transform:uppercase;">Payment Summary</h4>
+        <div class="cc-price-line"><span>Subtotal</span><span>₹{{ order.subtotal }}</span></div>
+        {% if order.coupon_discount > 0 %}<div class="cc-price-line"><span>Coupon ({{ order.coupon_code }})</span><span style="color:#388E3C;">− ₹{{ order.coupon_discount }}</span></div>{% endif %}
+        {% if order.supercoins_discount > 0 %}<div class="cc-price-line"><span>SuperCoins Discount</span><span style="color:#388E3C;">− ₹{{ order.supercoins_discount }}</span></div>{% endif %}
+        <div class="cc-price-line"><span>Platform & Delivery</span><span>₹{{ order.platform_fee|add:order.delivery_fee }}</span></div>
+        <div class="cc-price-total"><span>Total Amount</span><span>₹{{ order.total_amount }}</span></div>
+        <div style="font-size:12.5px;color:#B45309;font-weight:600;">🪙 Earned {{ order.supercoins_earned }} SuperCoins on this order</div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

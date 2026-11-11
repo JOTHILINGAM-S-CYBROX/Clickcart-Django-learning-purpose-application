@@ -1,0 +1,205 @@
+{% extends 'landingpage/base.html' %}
+{% load static %}
+
+{% block title %}Checkout | Clickcart{% endblock %}
+
+{% block content %}
+<div class="cc-container">
+  <div class="cc-two-col">
+
+    <!-- Left: 4-Step Checkout Flow -->
+    <div>
+      <!-- Step 1: Account -->
+      <div class="cc-card" style="padding:14px 20px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <span style="background:#F1F3F6;color:#2874F0;font-weight:700;padding:3px 9px;border-radius:2px;">1</span>
+            <div>
+              <div style="font-size:13px;font-weight:700;color:#878787;">LOGIN OR GUEST CHECKOUT ✓</div>
+              <div style="font-weight:600;margin-top:2px;">
+                {% if cc_user.is_authenticated %}
+                  {{ cc_user.name }} ({{ cc_user.email }})
+                {% else %}
+                  Shopping as Guest · <a href="{% url 'login' %}?next=/checkout/" style="color:#2874F0;">Sign In to use Wallet & SuperCoins</a>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2: Delivery Address + Place Order Form -->
+      <form id="checkoutOrderForm" method="post" action="{% url 'checkout' %}">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="place_order" />
+
+        <div class="cc-card">
+          <div style="background:#2874F0;color:#FFF;padding:12px 20px;font-weight:700;display:flex;align-items:center;gap:10px;">
+            <span style="background:#FFF;color:#2874F0;padding:1px 7px;border-radius:2px;font-size:12px;">2</span>
+            <span>DELIVERY ADDRESS</span>
+          </div>
+          <div style="padding:16px 20px;">
+            {% if addresses %}
+              {% for addr in addresses %}
+              <label style="display:flex;gap:12px;align-items:flex-start;padding:12px;border:1px solid #E5E7EB;border-radius:4px;margin-bottom:10px;cursor:pointer;">
+                <input type="radio" name="selected_address_id" value="{{ addr.id }}" {% if addr.is_default or forloop.first %}checked{% endif %} style="margin-top:4px;" />
+                <div>
+                  <div style="font-weight:700;">
+                    {{ addr.full_name }}
+                    <span style="background:#F1F3F6;color:#555;font-size:10.5px;padding:2px 6px;border-radius:2px;margin:0 6px;">{{ addr.address_type }}</span>
+                    <span>{{ addr.phone }}</span>
+                  </div>
+                  <div style="font-size:13.5px;color:#444;margin-top:4px;">
+                    {{ addr.street_address }}, {{ addr.locality }}, {{ addr.city }}, {{ addr.state }} - <strong>{{ addr.pincode }}</strong>
+                  </div>
+                </div>
+              </label>
+              {% endfor %}
+            {% else %}
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                <input type="text" name="guest_name" placeholder="Full Name *" class="cc-input" required />
+                <input type="text" name="guest_phone" placeholder="10-digit Mobile Number *" class="cc-input" required />
+                <input type="text" name="guest_pincode" value="{{ selected_pincode }}" placeholder="Pincode *" maxlength="6" class="cc-input" required />
+                <input type="text" name="guest_city" value="{{ selected_pincode_info.city }}" placeholder="City *" class="cc-input" required />
+                <input type="text" name="guest_street" placeholder="House No, Building, Street *" class="cc-input" style="grid-column:1 / -1;" required />
+                <input type="text" name="guest_state" value="{{ selected_pincode_info.state }}" placeholder="State *" class="cc-input" required />
+              </div>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Step 3: Order Summary -->
+        <div class="cc-card">
+          <div style="background:#2874F0;color:#FFF;padding:12px 20px;font-weight:700;display:flex;align-items:center;gap:10px;">
+            <span style="background:#FFF;color:#2874F0;padding:1px 7px;border-radius:2px;font-size:12px;">3</span>
+            <span>ORDER SUMMARY ({{ summary.item_count }} ITEMS)</span>
+          </div>
+          <div style="padding:14px 20px;">
+            {% for it in summary.items %}
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #F3F4F6;gap:12px;">
+                <div style="display:flex;align-items:center;gap:12px;">
+                  <img src="{% static it.product.primary_image %}" alt="" style="width:48px;height:48px;object-fit:contain;" />
+                  <div>
+                    <div style="font-weight:600;font-size:13.5px;">{{ it.product.title }}</div>
+                    <div style="font-size:12px;color:#666;">Qty: {{ it.quantity }} {% if it.variant_label %}· {{ it.variant_label }}{% endif %}</div>
+                  </div>
+                </div>
+                <div style="font-weight:700;">₹{{ it.line_total }}</div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- Step 4: Payment Options -->
+        <div class="cc-card">
+          <div style="background:#2874F0;color:#FFF;padding:12px 20px;font-weight:700;display:flex;align-items:center;gap:10px;">
+            <span style="background:#FFF;color:#2874F0;padding:1px 7px;border-radius:2px;font-size:12px;">4</span>
+            <span>PAYMENT OPTIONS</span>
+          </div>
+          <div style="padding:16px 20px;display:flex;flex-direction:column;gap:10px;">
+            <label style="display:flex;align-items:center;gap:10px;padding:10px;border:1px solid #E5E7EB;border-radius:4px;cursor:pointer;">
+              <input type="radio" name="payment_method" value="UPI" checked />
+              <div>
+                <strong>UPI (PhonePe / Google Pay / Paytm)</strong>
+                <div style="font-size:12px;color:#666;">Instant zero-fee payment via UPI App or UPI ID</div>
+              </div>
+            </label>
+
+            <label style="display:flex;align-items:center;gap:10px;padding:10px;border:1px solid #E5E7EB;border-radius:4px;cursor:pointer;">
+              <input type="radio" name="payment_method" value="CARD" />
+              <div>
+                <strong>Credit / Debit / ATM Card</strong>
+                <div style="font-size:12px;color:#666;">Visa, Mastercard, RuPay — 10% Instant Bank Offer Eligible</div>
+              </div>
+            </label>
+
+            <label style="display:flex;align-items:center;gap:10px;padding:10px;border:1px solid #E5E7EB;border-radius:4px;cursor:pointer;">
+              <input type="radio" name="payment_method" value="NETBANKING" />
+              <div>
+                <strong>Net Banking</strong>
+                <div style="font-size:12px;color:#666;">HDFC, SBI, ICICI, Axis & 40+ Indian Banks</div>
+              </div>
+            </label>
+
+            <label style="display:flex;align-items:center;gap:10px;padding:10px;border:1px solid #E5E7EB;border-radius:4px;cursor:pointer;">
+              <input type="radio" name="payment_method" value="EMI" />
+              <div>
+                <strong>Easy No-Cost EMI</strong>
+                <div style="font-size:12px;color:#666;">Flexible 3 to 12 month monthly installments</div>
+              </div>
+            </label>
+
+            {% if cc_user.is_authenticated %}
+            <label style="display:flex;align-items:center;gap:10px;padding:10px;border:1px solid #E5E7EB;border-radius:4px;cursor:pointer;">
+              <input type="radio" name="payment_method" value="WALLET" />
+              <div>
+                <strong>Clickcart Pay Wallet (Available Balance: ₹{{ cc_user.wallet_balance }})</strong>
+                <div style="font-size:12px;color:#388E3C;">Instant 1-click checkout from wallet balance</div>
+              </div>
+            </label>
+            {% endif %}
+
+            <label style="display:flex;align-items:center;gap:10px;padding:10px;border:1px solid #E5E7EB;border-radius:4px;cursor:pointer;">
+              <input type="radio" name="payment_method" value="COD" />
+              <div>
+                <strong>Cash on Delivery (Pay at Doorstep)</strong>
+                <div style="font-size:12px;color:#666;">Pay by cash or UPI QR when your order arrives</div>
+              </div>
+            </label>
+
+            <button type="submit" class="cc-btn cc-btn-orange cc-btn-lg" style="margin-top:8px;">
+              Confirm & Pay ₹{{ summary.payable_total }}
+            </button>
+          </div>
+        </div>
+      </form>
+
+      <!-- Add Additional Address Form -->
+      {% if addresses %}
+      <div class="cc-card" style="padding:16px 20px;">
+        <h4 style="margin:0 0 12px;">+ Add a New Delivery Address</h4>
+        <form method="post" action="{% url 'checkout' %}" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="add_address" />
+          <input type="text" name="full_name" placeholder="Full Name *" class="cc-input" required />
+          <input type="text" name="phone" placeholder="Phone Number *" class="cc-input" required />
+          <input type="text" name="pincode" maxlength="6" placeholder="Pincode *" class="cc-input" required />
+          <input type="text" name="locality" placeholder="Locality *" class="cc-input" required />
+          <input type="text" name="street_address" placeholder="Street Address / Flat No *" class="cc-input" style="grid-column:1 / -1;" required />
+          <input type="text" name="city" placeholder="City *" class="cc-input" required />
+          <input type="text" name="state" placeholder="State *" class="cc-input" required />
+          <select name="address_type" class="cc-input">
+            <option value="HOME">Home (All day delivery)</option>
+            <option value="WORK">Work (10 AM - 5 PM)</option>
+          </select>
+          <button type="submit" class="cc-btn cc-btn-blue">Save & Use Address</button>
+        </form>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Right: Sticky Price Details -->
+    <div class="cc-sticky-summary">
+      <div class="cc-card" style="padding:16px 20px;">
+        <div style="font-size:14px;font-weight:700;color:#878787;text-transform:uppercase;padding-bottom:10px;border-bottom:1px solid #F0F0F0;">Price Details</div>
+        <div class="cc-price-line"><span>Price ({{ summary.item_count }} items)</span><span>₹{{ summary.total_mrp }}</span></div>
+        <div class="cc-price-line"><span>Discount</span><span style="color:#388E3C;">− ₹{{ summary.product_discount }}</span></div>
+        {% if summary.exchange_discount > 0 %}
+          <div class="cc-price-line"><span>Exchange Bonus</span><span style="color:#388E3C;">− ₹{{ summary.exchange_discount }}</span></div>
+        {% endif %}
+        {% if summary.coupon_discount > 0 %}
+          <div class="cc-price-line"><span>Coupon ({{ summary.coupon_code }})</span><span style="color:#388E3C;">− ₹{{ summary.coupon_discount }}</span></div>
+        {% endif %}
+        {% if summary.supercoins_discount > 0 %}
+          <div class="cc-price-line"><span>SuperCoins Redeemed</span><span style="color:#388E3C;">− ₹{{ summary.supercoins_discount }}</span></div>
+        {% endif %}
+        <div class="cc-price-line"><span>Platform Fee</span><span>₹{{ summary.platform_fee }}</span></div>
+        <div class="cc-price-line"><span>Delivery Charges</span><span>{% if summary.delivery_fee == 0 %}<span style="color:#388E3C;font-weight:700;">FREE</span>{% else %}₹{{ summary.delivery_fee }}{% endif %}</span></div>
+        <div class="cc-price-total"><span>Total Payable</span><span>₹{{ summary.payable_total }}</span></div>
+        <div style="font-size:12.5px;color:#388E3C;font-weight:700;">You will save ₹{{ summary.total_savings }} & earn 🪙 {{ summary.coins_to_earn }} SuperCoins!</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

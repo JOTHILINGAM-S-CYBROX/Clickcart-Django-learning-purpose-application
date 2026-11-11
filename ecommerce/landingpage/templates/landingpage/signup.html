@@ -1,0 +1,44 @@
+{% extends 'landingpage/base.html' %}
+
+{% block title %}Create Account | Clickcart{% endblock %}
+
+{% block content %}
+<div class="cc-container" style="padding-top:26px;">
+  <div class="cc-card" style="max-width:780px;margin:0 auto;display:grid;grid-template-columns:280px 1fr;overflow:hidden;">
+    <div style="background:#2874F0;color:#FFFFFF;padding:28px 24px;display:flex;flex-direction:column;justify-content:space-between;">
+      <div>
+        <h2 style="margin:0 0 10px;font-size:24px;">Looks like you're new here!</h2>
+        <p style="color:#E0E7FF;font-size:14px;line-height:1.6;">Sign up today to get ₹2,500 Demo Wallet balance & 50 SuperCoins instantly.</p>
+      </div>
+      <div style="font-size:12px;color:#FFE500;font-weight:700;">★ Instant Sign-Up · Zero DB Mode</div>
+    </div>
+
+    <div style="padding:28px;">
+      <form method="post">
+        {% csrf_token %}
+        <div style="margin-bottom:12px;">
+          <label style="display:block;font-weight:600;font-size:13px;margin-bottom:4px;">Full Name</label>
+          <input type="text" name="name" placeholder="Enter your full name" class="cc-input" required />
+        </div>
+        <div style="margin-bottom:12px;">
+          <label style="display:block;font-weight:600;font-size:13px;margin-bottom:4px;">Email Address</label>
+          <input type="email" name="email" placeholder="you@example.com" class="cc-input" required />
+        </div>
+        <div style="margin-bottom:12px;">
+          <label style="display:block;font-weight:600;font-size:13px;margin-bottom:4px;">Mobile Number</label>
+          <input type="text" name="phone" placeholder="10-digit mobile number" class="cc-input" />
+        </div>
+        <div style="margin-bottom:16px;">
+          <label style="display:block;font-weight:600;font-size:13px;margin-bottom:4px;">Create Password</label>
+          <input type="password" name="password" placeholder="At least 6 characters" class="cc-input" required />
+        </div>
+        <button type="submit" class="cc-btn cc-btn-orange cc-btn-lg" style="width:100%;">Create Account</button>
+      </form>
+      <div style="text-align:center;margin-top:16px;font-size:13.5px;">
+        Existing user? <a href="{% url 'login' %}" style="color:#2874F0;font-weight:700;">Log in</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

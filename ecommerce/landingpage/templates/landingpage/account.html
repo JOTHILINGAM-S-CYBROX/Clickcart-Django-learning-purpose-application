@@ -1,0 +1,138 @@
+{% extends 'landingpage/base.html' %}
+
+{% block title %}My Account | Clickcart{% endblock %}
+
+{% block content %}
+<div class="cc-container" style="padding-top:14px;">
+  <div class="cc-catalog-layout">
+    <!-- Left Sidebar Summary -->
+    <aside class="cc-filter-sidebar">
+      <div style="display:flex;align-items:center;gap:12px;padding-bottom:14px;border-bottom:1px solid #F0F0F0;">
+        <div style="width:46px;height:46px;border-radius:50%;background:#2874F0;color:#FFF;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;">
+          {{ cc_user.name|slice:":1"|upper }}
+        </div>
+        <div>
+          <div style="font-size:12px;color:#878787;">Hello,</div>
+          <div style="font-weight:700;font-size:15px;">{{ cc_user.name }}</div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:8px;padding-top:14px;font-weight:600;">
+        <a href="{% url 'orders' %}" style="padding:8px;border-radius:4px;background:#F8FAFC;">📦 My Orders</a>
+        <a href="{% url 'wishlist' %}" style="padding:8px;border-radius:4px;background:#F8FAFC;">♥ My Wishlist ({{ wishlist_count }})</a>
+        <a href="{% url 'supercoins' %}" style="padding:8px;border-radius:4px;background:#F8FAFC;">🪙 SuperCoins ({{ cc_user.supercoins }})</a>
+        <a href="{% url 'plus' %}" style="padding:8px;border-radius:4px;background:#F8FAFC;">★ Clickcart Plus</a>
+        <a href="{% url 'seller' %}" style="padding:8px;border-radius:4px;background:#F8FAFC;">🏪 Seller Hub</a>
+        <a href="{% url 'logout' %}" style="padding:8px;border-radius:4px;color:#D32F2F;">🚪 Logout</a>
+      </div>
+    </aside>
+
+    <!-- Right Content -->
+    <div>
+      <!-- Wallet & Plus Overview -->
+      <div class="cc-bank-grid" style="grid-template-columns:1fr 1fr;">
+        <div class="cc-card" style="padding:18px 20px;margin:0;">
+          <div style="font-size:12px;color:#878787;font-weight:700;text-transform:uppercase;">Clickcart Pay Wallet</div>
+          <div style="font-size:28px;font-weight:800;color:#2874F0;margin:6px 0;">₹{{ cc_user.wallet_balance }}</div>
+          <form method="post" style="display:flex;gap:8px;">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="topup_wallet" />
+            <input type="hidden" name="amount" value="1000" />
+            <button type="submit" class="cc-btn cc-btn-blue cc-btn-sm">+ Top Up ₹1,000</button>
+          </form>
+        </div>
+
+        <div class="cc-card" style="padding:18px 20px;margin:0;">
+          <div style="font-size:12px;color:#878787;font-weight:700;text-transform:uppercase;">SuperCoins & Plus Tier</div>
+          <div style="font-size:28px;font-weight:800;color:#B45309;margin:6px 0;">🪙 {{ cc_user.supercoins }} Coins</div>
+          <div style="font-size:13px;">
+            Status: {% if cc_user.is_plus_member %}<strong style="color:#388E3C;">Clickcart Plus Active ★</strong>{% else %}Standard Member · <a href="{% url 'plus' %}" style="color:#2874F0;font-weight:700;">Upgrade Free →</a>{% endif %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Profile Form -->
+      <div class="cc-card" style="padding:20px;margin-top:14px;">
+        <h3 style="margin:0 0 14px;">Personal Information</h3>
+        <form method="post" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="update_profile" />
+          <div>
+            <label style="font-size:12px;font-weight:600;color:#666;">Full Name</label>
+            <input type="text" name="name" value="{{ cc_user.name }}" class="cc-input" required />
+          </div>
+          <div>
+            <label style="font-size:12px;font-weight:600;color:#666;">Mobile Number</label>
+            <input type="text" name="phone" value="{{ cc_user.phone }}" class="cc-input" />
+          </div>
+          <div>
+            <label style="font-size:12px;font-weight:600;color:#666;">Email</label>
+            <input type="email" value="{{ cc_user.email }}" class="cc-input" disabled />
+          </div>
+          <div>
+            <label style="font-size:12px;font-weight:600;color:#666;">Gender</label>
+            <select name="gender" class="cc-input">
+              <option value="M" {% if cc_user.gender == 'M' %}selected{% endif %}>Male</option>
+              <option value="F" {% if cc_user.gender == 'F' %}selected{% endif %}>Female</option>
+              <option value="O" {% if cc_user.gender == 'O' %}selected{% endif %}>Other</option>
+            </select>
+          </div>
+          <div style="grid-column:1 / -1;">
+            <button type="submit" class="cc-btn cc-btn-blue">Save Profile</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Saved Addresses -->
+      <div class="cc-card" style="padding:20px;">
+        <h3 style="margin:0 0 14px;">Manage Saved Addresses ({{ addresses|length }})</h3>
+        {% for addr in addresses %}
+        <div style="border:1px solid #E5E7EB;padding:12px 14px;border-radius:4px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;">
+          <div>
+            <span style="background:#F1F3F6;padding:2px 6px;font-size:11px;font-weight:700;border-radius:2px;">{{ addr.address_type }}</span>
+            {% if addr.is_default %}<span style="background:#DCFCE7;color:#166534;padding:2px 6px;font-size:11px;font-weight:700;border-radius:2px;margin-left:6px;">DEFAULT</span>{% endif %}
+            <div style="font-weight:700;margin-top:6px;">{{ addr.full_name }} · {{ addr.phone }}</div>
+            <div style="font-size:13px;color:#555;">{{ addr.street_address }}, {{ addr.locality }}, {{ addr.city }}, {{ addr.state }} - {{ addr.pincode }}</div>
+          </div>
+          <div style="display:flex;gap:8px;">
+            {% if not addr.is_default %}
+            <form method="post">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="set_default_address" />
+              <input type="hidden" name="address_id" value="{{ addr.id }}" />
+              <button type="submit" class="cc-btn cc-btn-outline cc-btn-sm">Set Default</button>
+            </form>
+            {% endif %}
+            <form method="post">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="delete_address" />
+              <input type="hidden" name="address_id" value="{{ addr.id }}" />
+              <button type="submit" class="cc-btn cc-btn-outline cc-btn-sm" style="color:#D32F2F;">Delete</button>
+            </form>
+          </div>
+        </div>
+        {% endfor %}
+
+        <h4 style="margin:18px 0 10px;">Add New Address</h4>
+        <form method="post" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="add_address" />
+          <input type="text" name="full_name" placeholder="Full Name *" class="cc-input" required />
+          <input type="text" name="phone" placeholder="Phone Number *" class="cc-input" required />
+          <input type="text" name="pincode" maxlength="6" placeholder="Pincode *" class="cc-input" required />
+          <input type="text" name="locality" placeholder="Locality *" class="cc-input" required />
+          <input type="text" name="street_address" placeholder="Street Address *" class="cc-input" style="grid-column:1 / -1;" required />
+          <input type="text" name="city" placeholder="City *" class="cc-input" required />
+          <input type="text" name="state" placeholder="State *" class="cc-input" required />
+          <select name="address_type" class="cc-input">
+            <option value="HOME">Home</option>
+            <option value="WORK">Work</option>
+          </select>
+          <button type="submit" class="cc-btn cc-btn-blue">Save Address</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,305 @@
+{% extends 'landingpage/base.html' %}
+{% load static %}
+
+{% block title %}{{ product.title }} | Clickcart{% endblock %}
+
+{% block content %}
+<div class="cc-container" style="padding-top:12px;">
+  <div style="font-size:12.5px;color:#666;margin-bottom:10px;display:flex;gap:6px;flex-wrap:wrap;">
+    <a href="{% url 'home' %}">Home</a> ›
+    <a href="{% url 'product_list' %}?category={{ product.category_slug }}">{{ product.category_name }}</a> ›
+    <span style="color:#212121;font-weight:500;">{{ product.title }}</span>
+  </div>
+
+  <div class="cc-pdp-grid">
+    <!-- Left Column: Gallery + Buy Actions -->
+    <div class="cc-pdp-gallery">
+      <div class="cc-pdp-main-box">
+        <button
+          type="button"
+          class="cc-wish-float {% if product.id in wishlist_product_ids %}active{% endif %}"
+          data-wish-url="{% url 'wishlist_toggle' product.id %}"
+          title="Toggle Wishlist"
+        >
+          {% if product.id in wishlist_product_ids %}♥{% else %}♡{% endif %}
+        </button>
+        <img id="pdpMainImage" src="{% static product.primary_image %}" alt="{{ product.title }}" />
+      </div>
+
+      {% if product.gallery_images %}
+      <div class="cc-pdp-thumbs">
+        {% for img in product.gallery_images %}
+          <button type="button" class="cc-pdp-thumb {% if forloop.first %}active{% endif %}" data-src="{% static img %}">
+            <img src="{% static img %}" alt="{{ product.title }} view {{ forloop.counter }}" style="width:100%;height:100%;object-fit:contain;" />
+          </button>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;">
+        <form action="{% url 'cart_add' product.id %}" method="post" style="margin:0;">
+          {% csrf_token %}
+          <input type="hidden" name="variant_id" class="pdp-variant-input" value="{{ product.variants.0.id|default:'' }}" />
+          <input type="hidden" name="with_exchange" class="pdp-exchange-input" value="0" />
+          <input type="hidden" name="redirect_to" value="cart" />
+          <button type="submit" class="cc-btn cc-btn-amber cc-btn-lg" style="width:100%;" {% if product.stock <= 0 %}disabled{% endif %}>
+            🛒 ADD TO CART
+          </button>
+        </form>
+        <form action="{% url 'cart_add' product.id %}" method="post" style="margin:0;">
+          {% csrf_token %}
+          <input type="hidden" name="variant_id" class="pdp-variant-input" value="{{ product.variants.0.id|default:'' }}" />
+          <input type="hidden" name="with_exchange" class="pdp-exchange-input" value="0" />
+          <input type="hidden" name="buy_now" value="1" />
+          <button type="submit" class="cc-btn cc-btn-orange cc-btn-lg" style="width:100%;" {% if product.stock <= 0 %}disabled{% endif %}>
+            ⚡ BUY NOW
+          </button>
+        </form>
+      </div>
+
+      <div style="margin-top:10px;display:flex;gap:8px;">
+        <button
+          type="button"
+          class="cc-btn cc-btn-outline cc-btn-sm {% if product.id in compare_ids %}active{% endif %}"
+          data-compare-url="{% url 'compare_toggle' product.id %}"
+          style="flex:1;"
+        >
+          ⚖ Add to Compare
+        </button>
+        <a href="{% url 'compare' %}" class="cc-btn cc-btn-outline cc-btn-sm">View Compare ({{ compare_count }})</a>
+      </div>
+    </div>
+
+    <!-- Right Column: Specs, Offers, Delivery, Seller, Reviews & Q&A -->
+    <div>
+      <div style="font-size:12px;font-weight:700;color:#878787;text-transform:uppercase;">{{ product.brand }} · SKU {{ product.sku }}</div>
+      <h1 style="margin:4px 0 8px;font-size:21px;font-weight:600;line-height:1.35;">{{ product.title }}</h1>
+
+      <div class="cc-rating-row" style="margin-bottom:12px;">
+        <span class="cc-rating-pill">{{ product.rating_avg }} ★</span>
+        <span class="cc-rating-count">{{ product.rating_count }} Ratings &amp; {{ product.reviews|length }} Reviews</span>
+        {% if product.is_assured %}<span class="cc-assured-badge">✓ Clickcart Assured</span>{% endif %}
+        {% if product.is_deal_of_day %}<span style="background:#FEF3C7;color:#92400E;font-size:11px;font-weight:700;padding:2px 8px;border-radius:3px;">🔥 Deal of the Day</span>{% endif %}
+      </div>
+
+      <input type="hidden" id="pdpBasePrice" value="{{ product.selling_price }}" />
+      <input type="hidden" id="pdpBaseMrp" value="{{ product.mrp }}" />
+
+      <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:6px;">
+        <span id="pdpDisplayPrice" style="font-size:28px;font-weight:700;">₹{{ product.selling_price }}</span>
+        {% if product.mrp > product.selling_price %}
+          <span id="pdpDisplayMrp" style="font-size:16px;color:#878787;text-decoration:line-through;">₹{{ product.mrp }}</span>
+          <span style="font-size:16px;font-weight:700;color:#388E3C;">{{ product.discount_percent }}% off</span>
+        {% endif %}
+      </div>
+
+      <div style="font-size:12.5px;color:#388E3C;font-weight:600;margin-bottom:14px;">
+        🪙 Earn +{{ product.supercoins_reward }} SuperCoins · EMI starting ₹{{ product.emi_per_month }}/month
+        {% if product.stock > 0 %} · In Stock ({{ product.stock }} left){% else %} · <span style="color:#D32F2F;">Out of Stock</span>{% endif %}
+      </div>
+
+      <!-- Bank & Coupon Offers -->
+      <div style="background:#F8FAFC;border:1px solid #E5E7EB;border-radius:4px;padding:12px 14px;margin-bottom:16px;">
+        <div style="font-weight:700;font-size:13.5px;margin-bottom:8px;">Available Bank Offers &amp; Coupons</div>
+        {% for offer in bank_offers %}
+          <div style="font-size:12.5px;margin-bottom:5px;">
+            <strong style="color:#388E3C;">🏷 {{ offer.badge }}:</strong> {{ offer.bank }} — {{ offer.detail }}
+          </div>
+        {% endfor %}
+        <div style="font-size:12.5px;margin-top:6px;padding-top:6px;border-top:1px dashed #D1D5DB;">
+          <strong>Promo Codes:</strong>
+          {% for c in coupons %}
+            <span style="background:#EFF6FF;color:#1D4ED8;padding:2px 7px;border-radius:3px;font-weight:700;margin-right:4px;">{{ c.code }}</span>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Variants -->
+      {% if product.variants %}
+      <div style="margin-bottom:16px;">
+        <div style="font-size:13px;font-weight:700;color:#555;margin-bottom:8px;">Select Option / Variant</div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;">
+          {% for v in product.variants %}
+            <button
+              type="button"
+              class="cc-variant-chip {% if forloop.first %}active{% endif %}"
+              data-variant-id="{{ v.id }}"
+              data-price-delta="{{ v.price_delta }}"
+            >
+              {% if v.color_hex %}<span class="cc-swatch-dot" style="background:{{ v.color_hex }};"></span>{% endif %}
+              <span>{{ v.name }}</span>
+            </button>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Exchange Option -->
+      {% if product.is_exchange_available %}
+      <div style="border:1px solid #DBEAFE;background:#F0F7FF;padding:12px 14px;border-radius:4px;margin-bottom:16px;">
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:600;font-size:13.5px;">
+          <input type="checkbox" id="pdpExchangeToggle" />
+          <span>Buy with Old Device Exchange (Save up to ₹{{ product.max_exchange_discount }} on Cart checkout)</span>
+        </label>
+      </div>
+      {% endif %}
+
+      <!-- Delivery Pincode Check -->
+      <div style="border:1px solid #E5E7EB;padding:12px 14px;border-radius:4px;margin-bottom:16px;">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+          <strong style="font-size:13.5px;">Delivery</strong>
+          <input type="text" id="pdpPincodeInput" maxlength="6" value="{{ selected_pincode }}" class="cc-input" style="max-width:140px;" placeholder="Enter Pincode" />
+          <button type="button" id="pdpCheckPincodeBtn" class="cc-btn cc-btn-blue cc-btn-sm">Check</button>
+        </div>
+        <div id="pdpPincodeResult" style="font-size:12.5px;margin-top:8px;color:#333;">
+          <span style="color:#388E3C;font-weight:600;">✓ Delivery by {{ product.estimated_delivery_str }} to {{ selected_pincode }} ({{ selected_pincode_info.city }})</span>
+          · {% if product.is_cod_available %}Cash on Delivery available{% else %}Prepaid / Card / UPI recommended{% endif %}
+        </div>
+      </div>
+
+      <!-- Highlights & Seller -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px;">
+        {% if product.highlights_list %}
+        <div>
+          <div style="font-weight:700;font-size:14px;margin-bottom:8px;">Highlights</div>
+          <ul style="margin:0;padding-left:18px;font-size:13px;color:#374151;line-height:1.7;">
+            {% for h in product.highlights_list %}
+              <li>{{ h }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+        {% endif %}
+        <div style="background:#FAFAFA;border:1px solid #E5E7EB;border-radius:4px;padding:12px 14px;font-size:13px;">
+          <div style="font-weight:700;font-size:14px;margin-bottom:6px;">Seller &amp; Policies</div>
+          <div>Seller: <strong>{{ product.seller_name }}</strong> <span class="cc-rating-pill" style="margin-left:4px;">{{ product.seller_rating }} ★</span></div>
+          <div style="margin-top:6px;">• {{ product.return_policy_days }}-Day Replacement Policy</div>
+          <div>• {{ product.warranty_summary }}</div>
+          <div>• GST Tax Invoice Available</div>
+        </div>
+      </div>
+
+      <p style="font-size:13.5px;color:#4B5563;line-height:1.6;">{{ product.description }}</p>
+
+      <!-- Specifications Table -->
+      {% if product.specifications %}
+      <div style="border:1px solid #E5E7EB;border-radius:4px;margin:18px 0;overflow:hidden;">
+        <div style="background:#F8FAFC;padding:12px 16px;font-weight:700;font-size:15px;border-bottom:1px solid #E5E7EB;">Specifications</div>
+        <table style="width:100%;border-collapse:collapse;font-size:13.5px;">
+          {% for key, val in product.specifications.items %}
+          <tr style="border-bottom:1px solid #F3F4F6;">
+            <td style="padding:10px 16px;width:32%;color:#6B7280;font-weight:600;">{{ key }}</td>
+            <td style="padding:10px 16px;color:#111827;">{{ val }}</td>
+          </tr>
+          {% endfor %}
+        </table>
+      </div>
+      {% endif %}
+
+      <!-- Ratings & Reviews -->
+      <div style="border:1px solid #E5E7EB;border-radius:4px;padding:16px;margin-bottom:18px;">
+        <h2 style="margin:0 0 12px;font-size:18px;">Ratings &amp; Reviews</h2>
+        <div style="display:flex;gap:24px;flex-wrap:wrap;padding-bottom:14px;border-bottom:1px solid #F3F4F6;">
+          <div style="text-align:center;min-width:110px;">
+            <div style="font-size:32px;font-weight:700;">{{ product.rating_avg }} ★</div>
+            <div style="font-size:12px;color:#6B7280;">{{ product.rating_count }} Ratings</div>
+          </div>
+          <div style="flex:1;min-width:200px;">
+            {% for row in product.rating_breakdown %}
+            <div style="display:flex;align-items:center;gap:8px;font-size:12px;margin-bottom:4px;">
+              <span style="width:28px;">{{ row.star }} ★</span>
+              <div style="flex:1;height:6px;background:#E5E7EB;border-radius:99px;overflow:hidden;">
+                <div style="width:{{ row.pct }}%;height:100%;background:{% if row.star >= 3 %}#388E3C{% elif row.star == 2 %}#F59E0B{% else %}#EF4444{% endif %};"></div>
+              </div>
+              <span style="width:28px;color:#6B7280;">{{ row.count }}</span>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <form method="post" style="margin:14px 0;background:#F8FAFC;padding:12px;border-radius:4px;">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="add_review" />
+          <div style="font-weight:700;font-size:13.5px;margin-bottom:8px;">Rate &amp; Review this Product</div>
+          <div style="display:grid;grid-template-columns:130px 1fr;gap:8px;margin-bottom:8px;">
+            <select name="rating" class="cc-input">
+              <option value="5">5 ★ Amazing</option>
+              <option value="4">4 ★ Very Good</option>
+              <option value="3">3 ★ Good</option>
+              <option value="2">2 ★ Fair</option>
+              <option value="1">1 ★ Poor</option>
+            </select>
+            <input type="text" name="title" class="cc-input" placeholder="Review headline (e.g. Value for money)" />
+          </div>
+          <div style="display:flex;gap:8px;">
+            <input type="text" name="comment" class="cc-input" placeholder="Share your experience with this product..." required />
+            <button type="submit" class="cc-btn cc-btn-blue cc-btn-sm">Submit</button>
+          </div>
+        </form>
+
+        {% for rev in product.reviews %}
+          <div style="padding:12px 0;border-top:1px solid #F3F4F6;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+              <span class="cc-rating-pill">{{ rev.rating }} ★</span>
+              <strong>{{ rev.title }}</strong>
+            </div>
+            <p style="margin:4px 0 6px;font-size:13.5px;color:#374151;">{{ rev.comment }}</p>
+            <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#6B7280;">
+              <span>{{ rev.user_name }} {% if rev.is_verified_purchase %}· ✔ Certified Buyer{% endif %} · {{ rev.created_at }}</span>
+              <form method="post" style="margin:0;">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="helpful_review" />
+                <input type="hidden" name="review_id" value="{{ rev.id }}" />
+                <button type="submit" class="cc-btn cc-btn-outline cc-btn-sm">👍 Helpful ({{ rev.helpful_count }})</button>
+              </form>
+            </div>
+          </div>
+        {% empty %}
+          <p style="color:#6B7280;font-size:13px;">No reviews yet. Be the first to review!</p>
+        {% endfor %}
+      </div>
+
+      <!-- Questions & Answers -->
+      <div style="border:1px solid #E5E7EB;border-radius:4px;padding:16px;">
+        <h2 style="margin:0 0 12px;font-size:18px;">Questions and Answers</h2>
+        <form method="post" style="display:flex;gap:8px;margin-bottom:14px;">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="ask_question" />
+          <input type="text" name="question" class="cc-input" placeholder="Have a doubt regarding warranty, specs, or delivery? Ask here..." required />
+          <button type="submit" class="cc-btn cc-btn-blue cc-btn-sm">Ask</button>
+        </form>
+        {% for qa in product.questions %}
+          <div style="padding:10px 0;border-top:1px solid #F3F4F6;font-size:13.5px;">
+            <div style="font-weight:600;">Q: {{ qa.question }}</div>
+            <div style="color:#374151;margin-top:4px;">A: {{ qa.answer }}</div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;font-size:12px;color:#6B7280;">
+              <span>Answered by {{ qa.answered_by }}</span>
+              <form method="post" style="margin:0;">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="upvote_question" />
+                <input type="hidden" name="question_id" value="{{ qa.id }}" />
+                <button type="submit" class="cc-btn cc-btn-outline cc-btn-sm">▲ Useful ({{ qa.upvotes }})</button>
+              </form>
+            </div>
+          </div>
+        {% empty %}
+          <p style="color:#6B7280;font-size:13px;">Ask the first question about this product.</p>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  {% if similar_products %}
+  <div class="cc-card" style="margin-top:16px;">
+    <div class="cc-section-head">
+      <h2 class="cc-section-title">Similar Products</h2>
+      <a href="{% url 'product_list' %}?category={{ product.category_slug }}" class="cc-btn cc-btn-outline cc-btn-sm">View All</a>
+    </div>
+    <div class="cc-prod-grid">
+      {% for sp in similar_products %}
+        {% include 'landingpage/partials_product_card.html' with p=sp %}
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

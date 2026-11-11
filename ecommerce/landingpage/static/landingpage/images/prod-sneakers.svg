@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400">
+  <defs>
+    <radialGradient id="pbg" cx="50%" cy="45%" r="60%">
+      <stop offset="0%" stop-color="#FEF2F2"/>
+      <stop offset="100%" stop-color="#FEE2E2"/>
+    </radialGradient>
+    <filter id="sh" x="-15%" y="-15%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="14" stdDeviation="12" flood-color="#0F172A" flood-opacity="0.16"/>
+    </filter>
+  </defs>
+  <rect width="400" height="400" fill="url(#pbg)"/>
+  <ellipse cx="200" cy="348" rx="108" ry="16" fill="#0F172A" opacity="0.09"/>
+  <g filter="url(#sh)">
+  <path d="M68 248c18-32 45-64 72-86l38 26c26 18 54 12 78-4l58 32c16 9 20 34 8 48H68v-16z" fill="#EF4444"/>
+  <path d="M62 264h268c8 0 12 18 0 24H62c-10-4-10-20 0-24z" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="2"/>
+  <rect x="120" y="268" width="76" height="12" rx="6" fill="#38BDF8" opacity="0.7"/>
+  <path d="M135 190l22-16M152 204l22-16M170 218l22-16" stroke="#fff" stroke-width="5" stroke-linecap="round"/>
+</g>
+  <rect x="24" y="24" width="96" height="26" rx="13" fill="#2874F0"/><text x="72" y="41" text-anchor="middle" font-family="Arial" font-size="11" font-weight="700" fill="#fff">AIR RUN</text>
+</svg>

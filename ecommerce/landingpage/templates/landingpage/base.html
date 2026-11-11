@@ -1,0 +1,175 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}Clickcart — Online Shopping Site for Mobiles, Electronics, Fashion &amp; More{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'landingpage/css/style.css' %}" />
+  <script defer src="{% static 'landingpage/js/app.js' %}"></script>
+</head>
+<body>
+  <header class="cc-header">
+    <div class="cc-container cc-header-inner">
+      <a href="{% url 'home' %}" class="cc-logo" aria-label="Clickcart Home">
+        <span class="cc-logo-main">Clickcart</span>
+        <span class="cc-logo-sub">Explore <span>Plus ✦</span></span>
+      </a>
+
+      <div class="cc-search-wrap">
+        <form class="cc-search-form" action="{% url 'product_list' %}" method="get" autocomplete="off">
+          <input
+            id="ccSearchInput"
+            type="text"
+            name="q"
+            value="{{ request.GET.q|default:'' }}"
+            class="cc-search-input"
+            placeholder="Search for Products, Brands and More"
+            aria-label="Search products"
+          />
+          <button type="submit" class="cc-search-btn" aria-label="Search">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+          </button>
+        </form>
+        <div id="ccSearchDropdown" class="cc-search-dropdown"></div>
+      </div>
+
+      <nav class="cc-nav-actions" aria-label="Main Navigation">
+        <button type="button" class="cc-pincode-btn cc-hide-xs" data-open-pincode title="Change delivery pincode">
+          <span>📍</span>
+          <span id="headerPincodeText">{{ selected_pincode }} · {{ selected_pincode_info.city }}</span>
+        </button>
+
+        {% if cc_user.is_authenticated %}
+          <div class="cc-dropdown">
+            <a href="{% url 'account' %}" class="cc-nav-link">
+              <span>{{ cc_user.name }}</span>
+              <span style="font-size:10px;">▾</span>
+            </a>
+            <div class="cc-dropdown-menu">
+              <div class="cc-dropdown-header" style="background:#F8FAFC;font-weight:700;">
+                <span>{{ cc_user.name }}</span>
+                {% if cc_user.is_plus_member %}<span style="color:#B45309;">Plus ✦</span>{% endif %}
+              </div>
+              <a href="{% url 'account' %}"><span>My Account &amp; Wallet</span><span>₹{{ cc_user.wallet_balance }}</span></a>
+              <a href="{% url 'supercoins' %}"><span>SuperCoin Zone</span><span>🪙 {{ supercoins_balance }}</span></a>
+              <a href="{% url 'plus' %}"><span>Clickcart Plus</span><span>✦</span></a>
+              <a href="{% url 'orders' %}"><span>My Orders</span></a>
+              <a href="{% url 'wishlist' %}"><span>Wishlist</span><span id="headerWishCount">{{ wishlist_count }}</span></a>
+              <a href="{% url 'notifications' %}"><span>Notifications</span><span>{{ unread_notifications_count }}</span></a>
+              <a href="{% url 'logout' %}" style="color:#D32F2F;font-weight:700;"><span>Logout</span></a>
+            </div>
+          </div>
+        {% else %}
+          <a href="{% url 'login' %}" class="cc-login-btn">Login</a>
+        {% endif %}
+
+        <a href="{% url 'seller' %}" class="cc-nav-link cc-hide-xs">Become a Seller</a>
+
+        <div class="cc-dropdown cc-hide-xs">
+          <span class="cc-nav-link">More ▾</span>
+          <div class="cc-dropdown-menu">
+            <a href="{% url 'notifications' %}"><span>Notifications</span><span>{{ unread_notifications_count }}</span></a>
+            <a href="{% url 'compare' %}"><span>Compare Products</span><span id="headerCompareCount">{{ compare_count }}</span></a>
+            <a href="{% url 'wishlist' %}"><span>Wishlist</span><span>{{ wishlist_count }}</span></a>
+            <a href="{% url 'supercoins' %}"><span>SuperCoins Zone</span><span>{{ supercoins_balance }}</span></a>
+            <a href="{% url 'support' %}"><span>24x7 Customer Care</span></a>
+            <a href="{% url 'product_list' %}?deal=1"><span>Deal of the Day</span></a>
+          </div>
+        </div>
+
+        <a href="{% url 'cart' %}" class="cc-nav-link" aria-label="Shopping Cart">
+          <span>🛒 Cart</span>
+          <span class="cc-badge-count">{{ cart_count }}</span>
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  {% block subnav %}{% endblock %}
+
+  {% if messages %}
+    <div id="ccToastStack" class="cc-toast-stack">
+      {% for msg in messages %}
+        <div class="cc-toast {{ msg.tags }}" data-auto="1">
+          <span>{{ msg }}</span>
+          <button type="button" style="background:none;border:none;color:#aaa;cursor:pointer;font-size:16px;" onclick="this.parentElement.remove()">×</button>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Pincode Delivery Modal -->
+  <div id="ccPincodeModal" class="cc-modal-backdrop" role="dialog" aria-modal="true" aria-label="Choose delivery pincode">
+    <div class="cc-modal">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <h3 style="margin:0;font-size:17px;">Choose Your Delivery Location</h3>
+        <button type="button" data-close-pincode style="background:none;border:none;font-size:20px;cursor:pointer;color:#666;">×</button>
+      </div>
+      <p style="font-size:13px;color:#555;margin:0 0 12px;">
+        Enter a 6-digit Indian pincode to check delivery speed, Clickcart Assured express shipping &amp; COD eligibility.
+      </p>
+      <form action="{% url 'check_pincode' %}" method="post" style="display:flex;gap:8px;margin-bottom:14px;">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ request.get_full_path }}" />
+        <input type="text" name="pincode" maxlength="6" value="{{ selected_pincode }}" class="cc-input" placeholder="e.g. 560001" required />
+        <button type="submit" class="cc-btn cc-btn-blue">Apply</button>
+      </form>
+      <div style="font-size:12px;color:#666;margin-bottom:8px;">Quick Select Metro Pincodes:</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;">
+        <form action="{% url 'check_pincode' %}" method="post" style="display:inline;"><input type="hidden" name="pincode" value="560001" /><input type="hidden" name="next" value="{{ request.get_full_path }}" />{% csrf_token %}<button type="submit" class="cc-btn cc-btn-outline cc-btn-sm">560001 Bengaluru</button></form>
+        <form action="{% url 'check_pincode' %}" method="post" style="display:inline;"><input type="hidden" name="pincode" value="641001" /><input type="hidden" name="next" value="{{ request.get_full_path }}" />{% csrf_token %}<button type="submit" class="cc-btn cc-btn-outline cc-btn-sm">641001 Coimbatore</button></form>
+        <form action="{% url 'check_pincode' %}" method="post" style="display:inline;"><input type="hidden" name="pincode" value="600001" /><input type="hidden" name="next" value="{{ request.get_full_path }}" />{% csrf_token %}<button type="submit" class="cc-btn cc-btn-outline cc-btn-sm">600001 Chennai</button></form>
+        <form action="{% url 'check_pincode' %}" method="post" style="display:inline;"><input type="hidden" name="pincode" value="400001" /><input type="hidden" name="next" value="{{ request.get_full_path }}" />{% csrf_token %}<button type="submit" class="cc-btn cc-btn-outline cc-btn-sm">400001 Mumbai</button></form>
+        <form action="{% url 'check_pincode' %}" method="post" style="display:inline;"><input type="hidden" name="pincode" value="110001" /><input type="hidden" name="next" value="{{ request.get_full_path }}" />{% csrf_token %}<button type="submit" class="cc-btn cc-btn-outline cc-btn-sm">110001 Delhi</button></form>
+      </div>
+    </div>
+  </div>
+
+  <footer class="cc-footer">
+    <div class="cc-container">
+      <div class="cc-footer-grid">
+        <div>
+          <h4>About</h4>
+          <a href="{% url 'support' %}">Contact Us</a>
+          <a href="{% url 'plus' %}">Clickcart Plus</a>
+          <a href="{% url 'supercoins' %}">SuperCoins Rewards</a>
+          <a href="{% url 'seller' %}">Sell on Clickcart</a>
+        </div>
+        <div>
+          <h4>Help</h4>
+          <a href="{% url 'orders' %}">Track Orders</a>
+          <a href="{% url 'support' %}">Payments &amp; EMI</a>
+          <a href="{% url 'support' %}">Shipping &amp; Delivery</a>
+          <a href="{% url 'support' %}">Cancellation &amp; Returns</a>
+        </div>
+        <div>
+          <h4>Shop Categories</h4>
+          <a href="{% url 'product_list' %}?category=mobiles">Mobiles</a>
+          <a href="{% url 'product_list' %}?category=electronics">Electronics</a>
+          <a href="{% url 'product_list' %}?category=fashion">Fashion</a>
+          <a href="{% url 'product_list' %}?category=appliances">TVs &amp; Appliances</a>
+        </div>
+        <div>
+          <h4>Consumer Features</h4>
+          <a href="{% url 'compare' %}">Compare Products</a>
+          <a href="{% url 'wishlist' %}">My Wishlist</a>
+          <a href="{% url 'cart' %}">Shopping Cart &amp; Coupons</a>
+          <a href="{% url 'account' %}">Clickcart Wallet</a>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;padding-top:16px;color:#CBD5E1;">
+        <span>© 2026 Clickcart.com · Powered without Database (In-Memory Demo Mode)</span>
+        <span>Demo Login: <strong>aarav@clickcart.in</strong> / <strong>click123</strong></span>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

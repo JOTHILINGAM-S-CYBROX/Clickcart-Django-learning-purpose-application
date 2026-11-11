@@ -1,0 +1,85 @@
+{% extends 'landingpage/base.html' %}
+{% load static %}
+
+{% block title %}Seller Hub | Clickcart{% endblock %}
+
+{% block content %}
+<div class="cc-container" style="padding-top:14px;">
+  <div class="cc-card" style="background:linear-gradient(135deg,#1E293B 0%,#2874F0 100%);color:#FFF;padding:24px 28px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;">
+    <div>
+      <div style="font-size:12px;color:#FFE500;font-weight:700;text-transform:uppercase;">Clickcart Seller Hub</div>
+      <h1 style="margin:4px 0;font-size:26px;">{{ store_name }}</h1>
+      <p style="margin:0;color:#DBEAFE;">Reach crores of shoppers across 19,000+ Indian pincodes with 0% onboarding fee.</p>
+    </div>
+    {% if not cc_user.is_seller %}
+      <form method="post" style="display:flex;gap:8px;flex-wrap:wrap;">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="register_seller" />
+        <input type="text" name="store_name" placeholder="Your Store Name" class="cc-input" style="width:210px;" required />
+        <button type="submit" class="cc-btn cc-btn-amber">Start Selling Now</button>
+      </form>
+    {% endif %}
+  </div>
+
+  <div class="cc-two-col">
+    <!-- Add Live Product Form -->
+    <div class="cc-card" style="padding:20px;">
+      <h2 style="margin:0 0 14px;font-size:18px;">List a New Product on Clickcart Marketplace</h2>
+      <form method="post" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="add_product" />
+        <div style="grid-column:1 / -1;">
+          <label style="font-size:12px;font-weight:600;">Product Title *</label>
+          <input type="text" name="title" placeholder="e.g., Boat Rockerz 550 Over-Ear Bluetooth Headphones" class="cc-input" required />
+        </div>
+        <div>
+          <label style="font-size:12px;font-weight:600;">Brand *</label>
+          <input type="text" name="brand" placeholder="e.g., boAt" class="cc-input" required />
+        </div>
+        <div>
+          <label style="font-size:12px;font-weight:600;">Category *</label>
+          <select name="category_slug" class="cc-input">
+            {% for c in categories %}
+              <option value="{{ c.slug }}">{{ c.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div>
+          <label style="font-size:12px;font-weight:600;">MRP (₹) *</label>
+          <input type="number" name="mrp" value="3999" class="cc-input" required />
+        </div>
+        <div>
+          <label style="font-size:12px;font-weight:600;">Selling Price (₹) *</label>
+          <input type="number" name="selling_price" value="1999" class="cc-input" required />
+        </div>
+        <div>
+          <label style="font-size:12px;font-weight:600;">Stock Quantity *</label>
+          <input type="number" name="stock" value="30" class="cc-input" required />
+        </div>
+        <div style="grid-column:1 / -1;">
+          <label style="font-size:12px;font-weight:600;">Short Description</label>
+          <textarea name="short_description" rows="2" placeholder="Key selling highlights..." class="cc-input"></textarea>
+        </div>
+        <div style="grid-column:1 / -1;">
+          <button type="submit" class="cc-btn cc-btn-orange cc-btn-lg">Publish Product Live →</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Active Seller Listings -->
+    <div class="cc-card" style="padding:18px;">
+      <h3 style="margin:0 0 12px;font-size:16px;">Active Listings ({{ seller_products|length }})</h3>
+      {% for p in seller_products %}
+      <a href="{% url 'product_detail' p.slug %}" style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #F3F4F6;">
+        <img src="{% static p.primary_image %}" alt="" style="width:44px;height:44px;object-fit:contain;" />
+        <div style="flex:1;min-width:0;">
+          <div style="font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ p.title }}</div>
+          <div style="font-size:12px;color:#388E3C;font-weight:700;">₹{{ p.selling_price }} · Stock: {{ p.stock }}</div>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+

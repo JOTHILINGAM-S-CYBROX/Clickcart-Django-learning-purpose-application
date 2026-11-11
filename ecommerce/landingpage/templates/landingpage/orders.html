@@ -1,0 +1,65 @@
+{% extends 'landingpage/base.html' %}
+{% load static %}
+
+{% block title %}My Orders | Clickcart{% endblock %}
+
+{% block content %}
+<div class="cc-container" style="padding-top:14px;">
+  <div class="cc-card" style="padding:16px 20px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:16px;">
+      <h1 style="margin:0;font-size:20px;">My Orders ({{ orders|length }})</h1>
+      <form method="get" style="display:flex;gap:8px;flex-wrap:wrap;">
+        <input type="text" name="q" value="{{ q }}" placeholder="Search by Order ID or product..." class="cc-input" style="width:240px;" />
+        <select name="status" class="cc-input" style="width:160px;">
+          <option value="">All Statuses</option>
+          <option value="CONFIRMED" {% if status_filter == 'CONFIRMED' %}selected{% endif %}>Confirmed</option>
+          <option value="SHIPPED" {% if status_filter == 'SHIPPED' %}selected{% endif %}>Shipped</option>
+          <option value="DELIVERED" {% if status_filter == 'DELIVERED' %}selected{% endif %}>Delivered</option>
+          <option value="CANCELLED" {% if status_filter == 'CANCELLED' %}selected{% endif %}>Cancelled</option>
+        </select>
+        <button type="submit" class="cc-btn cc-btn-blue cc-btn-sm">Search</button>
+      </form>
+    </div>
+
+    {% if orders %}
+      {% for o in orders %}
+      <a href="{% url 'order_detail' o.order_number %}" style="display:block;border:1px solid #E5E7EB;border-radius:4px;padding:16px;margin-bottom:12px;background:#FFF;">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;padding-bottom:10px;border-bottom:1px solid #F3F4F6;">
+          <div>
+            <strong style="color:#2874F0;">Order #{{ o.order_number }}</strong>
+            <span style="font-size:12px;color:#878787;margin-left:10px;">Placed on {{ o.created_at }}</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;">
+            <span style="font-weight:700;">₹{{ o.total_amount }}</span>
+            <span style="padding:3px 10px;border-radius:99px;font-size:11.5px;font-weight:700;background:{% if o.status == 'DELIVERED' %}#DCFCE7;color:#166534{% elif o.status == 'CANCELLED' %}#FEE2E2;color:#991B1B{% else %}#DBEAFE;color:#1E40AF{% endif %};">
+              {{ o.status }}
+            </span>
+          </div>
+        </div>
+        {% for it in o.items %}
+        <div style="display:flex;align-items:center;gap:14px;padding-top:10px;">
+          <img src="{% static it.image %}" alt="" style="width:52px;height:52px;object-fit:contain;" />
+          <div style="flex:1;">
+            <div style="font-weight:600;">{{ it.title }}</div>
+            <div style="font-size:12px;color:#666;">Qty: {{ it.quantity }} {% if it.variant_label %}· {{ it.variant_label }}{% endif %}</div>
+          </div>
+          <div style="font-weight:600;">₹{{ it.line_total }}</div>
+        </div>
+        {% endfor %}
+        <div style="font-size:12.5px;color:#388E3C;font-weight:600;margin-top:8px;">
+          {% if o.status == 'CANCELLED' %}Cancelled ({{ o.cancellation_reason }}){% else %}Estimated Delivery: {{ o.estimated_delivery }}{% endif %} · Click to Track Order →
+        </div>
+      </a>
+      {% endfor %}
+    {% else %}
+      <div style="text-align:center;padding:48px 20px;">
+        <div style="font-size:44px;margin-bottom:8px;">📦</div>
+        <h3>No orders found yet</h3>
+        <p style="color:#666;">Explore Clickcart deals and place your first order!</p>
+        <a href="{% url 'product_list' %}" class="cc-btn cc-btn-blue">Browse Products</a>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+

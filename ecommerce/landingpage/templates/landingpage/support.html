@@ -1,0 +1,79 @@
+{% extends 'landingpage/base.html' %}
+
+{% block title %}24x7 Customer Care | Clickcart{% endblock %}
+
+{% block content %}
+<div class="cc-container" style="padding-top:14px;">
+  <div class="cc-card" style="padding:22px 24px;">
+    <h1 style="margin:0 0 6px;font-size:22px;">Clickcart 24x7 Customer Care & Help Center</h1>
+    <p style="margin:0;color:#666;">Instant help with your orders, returns, SuperCoins, and payments.</p>
+  </div>
+
+  <div class="cc-two-col">
+    <!-- Left: FAQs + Tickets -->
+    <div>
+      <div class="cc-card" style="padding:20px;">
+        <h3 style="margin:0 0 14px;">Frequently Asked Questions</h3>
+        {% for q, a in faqs %}
+        <div style="padding:12px 0;border-bottom:1px solid #F0F0F0;">
+          <div style="font-weight:700;margin-bottom:4px;color:#2874F0;">{{ q }}</div>
+          <div style="font-size:13.5px;color:#444;">{{ a }}</div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <div class="cc-card" style="padding:20px;">
+        <h3 style="margin:0 0 14px;">Your Support Tickets ({{ tickets|length }})</h3>
+        {% if tickets %}
+          {% for t in tickets %}
+          <div style="border:1px solid #E5E7EB;padding:12px 14px;border-radius:4px;margin-bottom:10px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <strong>{{ t.ticket_number }} · {{ t.subject }}</strong>
+              <span style="background:#DBEAFE;color:#1E40AF;font-size:11px;font-weight:700;padding:2px 8px;border-radius:99px;">{{ t.status }}</span>
+            </div>
+            <div style="font-size:13px;color:#444;margin:6px 0;">{{ t.message }}</div>
+            <div style="font-size:12.5px;color:#388E3C;background:#F0FDF4;padding:8px;border-radius:4px;">
+              <strong>Support Reply:</strong> {{ t.reply }}
+            </div>
+          </div>
+          {% endfor %}
+        {% else %}
+          <p style="color:#666;margin:0;">No support tickets raised yet.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Right: Raise Ticket Form -->
+    <div class="cc-card" style="padding:20px;">
+      <h3 style="margin:0 0 14px;">Raise a Support Ticket</h3>
+      <form method="post" style="display:flex;flex-direction:column;gap:12px;">
+        {% csrf_token %}
+        <div>
+          <label style="font-size:12px;font-weight:600;">Topic</label>
+          <select name="topic" class="cc-input">
+            <option value="ORDER">Order & Delivery Issue</option>
+            <option value="RETURN">Return, Refund & Replacement</option>
+            <option value="PAYMENT">Payments, UPI & SuperCoins</option>
+            <option value="ACCOUNT">Account & Clickcart Plus</option>
+            <option value="SELLER">Seller Support</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:12px;font-weight:600;">Order Number (Optional)</label>
+          <input type="text" name="order_number" placeholder="e.g. CC-20261108-7842" class="cc-input" />
+        </div>
+        <div>
+          <label style="font-size:12px;font-weight:600;">Subject *</label>
+          <input type="text" name="subject" placeholder="Briefly describe your issue" class="cc-input" required />
+        </div>
+        <div>
+          <label style="font-size:12px;font-weight:600;">Message *</label>
+          <textarea name="message" rows="4" placeholder="Provide complete details so our team can resolve quickly..." class="cc-input" required></textarea>
+        </div>
+        <button type="submit" class="cc-btn cc-btn-blue">Submit Ticket</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

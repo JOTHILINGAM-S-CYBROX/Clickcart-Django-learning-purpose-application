@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400">
+  <defs>
+    <radialGradient id="pbg" cx="50%" cy="45%" r="60%">
+      <stop offset="0%" stop-color="#FDF2F8"/>
+      <stop offset="100%" stop-color="#FCE7F3"/>
+    </radialGradient>
+    <filter id="sh" x="-15%" y="-15%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="14" stdDeviation="12" flood-color="#0F172A" flood-opacity="0.16"/>
+    </filter>
+  </defs>
+  <rect width="400" height="400" fill="url(#pbg)"/>
+  <ellipse cx="200" cy="348" rx="108" ry="16" fill="#0F172A" opacity="0.09"/>
+  <g filter="url(#sh)">
+  <rect x="148" y="142" width="104" height="172" rx="16" fill="#F97316" opacity="0.9"/>
+  <rect x="164" y="164" width="72" height="96" rx="8" fill="#FFF7ED"/>
+  <text x="200" y="206" text-anchor="middle" font-family="Arial" font-size="22" font-weight="900" fill="#EA580C">VIT C</text>
+  <text x="200" y="232" text-anchor="middle" font-family="Arial" font-size="12" font-weight="700" fill="#9A3412">GLOW SERUM</text>
+  <rect x="176" y="110" width="48" height="32" rx="4" fill="#1E293B"/>
+  <rect x="190" y="68" width="20" height="42" rx="10" fill="#334155"/>
+</g>
+  <rect x="24" y="24" width="96" height="26" rx="13" fill="#2874F0"/><text x="72" y="41" text-anchor="middle" font-family="Arial" font-size="11" font-weight="700" fill="#fff">GLOW</text>
+</svg>

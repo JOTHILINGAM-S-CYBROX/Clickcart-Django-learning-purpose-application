@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 320" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#064E3B"/>
+      <stop offset="100%" stop-color="#059669"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="320" fill="url(#bg)"/>
+  <circle cx="1020" cy="80" r="190" fill="rgba(255,255,255,0.08)"/>
+  <circle cx="1080" cy="240" r="140" fill="rgba(255,255,255,0.06)"/>
+  <rect x="64" y="48" width="300" height="32" rx="16" fill="#A7F3D0"/>
+  <text x="214" y="69" text-anchor="middle" font-family="Arial,sans-serif" font-weight="800" font-size="13" fill="#0F172A">NO-COST EMI STARTING ₹1,999/MO</text>
+  <text x="64" y="148" font-family="Arial,sans-serif" font-weight="900" font-size="52" fill="#FFFFFF">MEGA TECH UPGRADE</text>
+  <text x="64" y="196" font-family="Arial,sans-serif" font-weight="500" font-size="22" fill="rgba(255,255,255,0.92)">M3 Laptops, 4K QLED TVs & ANC Headphones</text>
+  <rect x="64" y="228" width="160" height="44" rx="6" fill="#FFFFFF"/>
+  <text x="144" y="256" text-anchor="middle" font-family="Arial,sans-serif" font-weight="800" font-size="16" fill="#064E3B">SHOP NOW →</text>
+</svg>

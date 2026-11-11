@@ -1,0 +1,57 @@
+{% extends 'landingpage/base.html' %}
+{% load static %}
+
+{% block title %}My Wishlist ({{ items|length }}) | Clickcart{% endblock %}
+
+{% block content %}
+<div class="cc-container" style="padding-top:14px;">
+  <div class="cc-card">
+    <div class="cc-section-head">
+      <h1 class="cc-section-title">My Wishlist ({{ items|length }})</h1>
+      <a href="{% url 'product_list' %}" class="cc-btn cc-btn-blue cc-btn-sm">Continue Shopping</a>
+    </div>
+
+    {% if items %}
+      {% for p in items %}
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 20px;border-bottom:1px solid #F0F0F0;flex-wrap:wrap;">
+        <div style="display:flex;align-items:center;gap:16px;flex:1;min-width:240px;">
+          <a href="{% url 'product_detail' p.slug %}">
+            <img src="{% static p.primary_image %}" alt="{{ p.title }}" style="width:82px;height:82px;object-fit:contain;" />
+          </a>
+          <div>
+            <a href="{% url 'product_detail' p.slug %}" style="font-weight:600;font-size:15px;">{{ p.title }}</a>
+            <div class="cc-rating-row" style="margin-top:5px;">
+              <span class="cc-rating-pill">{{ p.rating_avg }} ★</span>
+              <span class="cc-rating-count">({{ p.rating_count }})</span>
+              {% if p.is_assured %}<span class="cc-assured-badge">✓ Assured</span>{% endif %}
+            </div>
+            <div style="display:flex;align-items:baseline;gap:8px;margin-top:4px;">
+              <span style="font-weight:700;font-size:17px;">₹{{ p.selling_price }}</span>
+              <span style="text-decoration:line-through;color:#878787;font-size:13px;">₹{{ p.mrp }}</span>
+              <span style="color:#388E3C;font-weight:700;font-size:13px;">{{ p.discount_percent }}% off</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:10px;align-items:center;">
+          <form action="{% url 'cart_add' p.id %}" method="post">
+            {% csrf_token %}
+            <input type="hidden" name="redirect_to" value="cart" />
+            <button type="submit" class="cc-btn cc-btn-amber cc-btn-sm">Move to Cart</button>
+          </form>
+          <a href="{% url 'wishlist_toggle' p.id %}?next=/wishlist/" class="cc-btn cc-btn-outline cc-btn-sm" style="color:#D32F2F;">Remove</a>
+        </div>
+      </div>
+      {% endfor %}
+    {% else %}
+      <div style="text-align:center;padding:56px 20px;">
+        <div style="font-size:46px;margin-bottom:8px;">♥</div>
+        <h3>Empty Wishlist</h3>
+        <p style="color:#666;">Tap the heart icon on any product to save it here for later.</p>
+        <a href="{% url 'product_list' %}" class="cc-btn cc-btn-blue">Explore Products</a>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400">
+  <defs>
+    <radialGradient id="pbg" cx="50%" cy="45%" r="60%">
+      <stop offset="0%" stop-color="#F3F4F6"/>
+      <stop offset="100%" stop-color="#E5E7EB"/>
+    </radialGradient>
+    <filter id="sh" x="-15%" y="-15%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="14" stdDeviation="12" flood-color="#0F172A" flood-opacity="0.16"/>
+    </filter>
+  </defs>
+  <rect width="400" height="400" fill="url(#pbg)"/>
+  <ellipse cx="200" cy="348" rx="108" ry="16" fill="#0F172A" opacity="0.09"/>
+  <g filter="url(#sh)">
+  <path d="M126 96c0-26 32-42 74-42s74 16 74 42v192c0 24-32 40-74 40s-74-16-74-40V96z" fill="#1F2937"/>
+  <ellipse cx="200" cy="96" rx="74" ry="22" fill="#374151"/>
+  <rect x="162" y="114" width="76" height="32" rx="8" fill="#0F172A"/>
+  <text x="200" y="135" text-anchor="middle" font-family="Arial" font-size="16" font-weight="800" fill="#38BDF8">200°C</text>
+  <rect x="134" y="205" width="132" height="96" rx="14" fill="#111827" stroke="#6B7280" stroke-width="2"/>
+  <rect x="184" y="220" width="32" height="58" rx="8" fill="#D1D5DB"/>
+</g>
+  <rect x="24" y="24" width="96" height="26" rx="13" fill="#2874F0"/><text x="72" y="41" text-anchor="middle" font-family="Arial" font-size="11" font-weight="700" fill="#fff">4.5L PRO</text>
+</svg>

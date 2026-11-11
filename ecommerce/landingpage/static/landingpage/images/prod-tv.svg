@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400">
+  <defs>
+    <radialGradient id="pbg" cx="50%" cy="45%" r="60%">
+      <stop offset="0%" stop-color="#F5F3FF"/>
+      <stop offset="100%" stop-color="#EDE9FE"/>
+    </radialGradient>
+    <filter id="sh" x="-15%" y="-15%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="14" stdDeviation="12" flood-color="#0F172A" flood-opacity="0.16"/>
+    </filter>
+  </defs>
+  <rect width="400" height="400" fill="url(#pbg)"/>
+  <ellipse cx="200" cy="348" rx="108" ry="16" fill="#0F172A" opacity="0.09"/>
+  <g filter="url(#sh)">
+  <rect x="46" y="76" width="308" height="196" rx="8" fill="#0F172A" stroke="#475569" stroke-width="5"/>
+  <linearGradient id="tvs" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#F97316"/><stop offset="50%" stop-color="#EC4899"/><stop offset="100%" stop-color="#6366F1"/></linearGradient>
+  <rect x="56" y="86" width="288" height="176" fill="url(#tvs)"/>
+  <circle cx="200" cy="174" r="45" fill="#fff" opacity="0.22"/>
+  <polygon points="188,154 188,194 222,174" fill="#fff"/>
+  <path d="M120 272l-20 32M280 272l20 32" stroke="#334155" stroke-width="8" stroke-linecap="round"/>
+</g>
+  <rect x="24" y="24" width="96" height="26" rx="13" fill="#2874F0"/><text x="72" y="41" text-anchor="middle" font-family="Arial" font-size="11" font-weight="700" fill="#fff">4K QLED</text>
+</svg>

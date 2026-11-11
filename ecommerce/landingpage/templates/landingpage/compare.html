@@ -1,0 +1,113 @@
+{% extends 'landingpage/base.html' %}
+{% load static %}
+
+{% block title %}Compare Products ({{ items|length }}/4) | Clickcart{% endblock %}
+
+{% block content %}
+<div class="cc-container" style="padding-top:14px;">
+  <div class="cc-card">
+    <div class="cc-section-head">
+      <div>
+        <h1 class="cc-section-title">Compare Products ({{ items|length }}/4)</h1>
+        <div style="font-size:12.5px;color:#6B7280;">Side-by-side price, ratings &amp; technical specification comparison</div>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <a href="{% url 'product_list' %}" class="cc-btn cc-btn-outline cc-btn-sm">+ Add More</a>
+        {% if items %}
+          <a href="{% url 'compare_clear' %}" class="cc-btn cc-btn-outline cc-btn-sm" style="color:#D32F2F;">Clear All</a>
+        {% endif %}
+      </div>
+    </div>
+
+    {% if items %}
+    <div style="overflow-x:auto;padding:16px;">
+      <table style="width:100%;border-collapse:collapse;min-width:680px;font-size:13.5px;">
+        <thead>
+          <tr>
+            <th style="text-align:left;padding:12px;width:190px;background:#F8FAFC;border:1px solid #E5E7EB;">Feature</th>
+            {% for p in items %}
+            <th style="padding:14px;border:1px solid #E5E7EB;vertical-align:top;min-width:210px;text-align:left;">
+              <div style="display:flex;justify-content:flex-end;">
+                <a href="{% url 'compare_toggle' p.id %}?next=/compare/" style="color:#D32F2F;font-size:12px;font-weight:700;">✕ Remove</a>
+              </div>
+              <a href="{% url 'product_detail' p.slug %}" style="display:block;text-align:center;margin:8px 0;">
+                <img src="{% static p.primary_image %}" alt="{{ p.title }}" style="height:120px;object-fit:contain;margin:0 auto;" />
+              </a>
+              <a href="{% url 'product_detail' p.slug %}" style="color:#2874F0;font-weight:600;display:block;margin-bottom:6px;">{{ p.title }}</a>
+            </th>
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="padding:10px 12px;font-weight:700;background:#F8FAFC;border:1px solid #E5E7EB;">Clickcart Price</td>
+            {% for p in items %}
+            <td style="padding:10px 12px;border:1px solid #E5E7EB;">
+              <strong style="font-size:17px;">₹{{ p.selling_price }}</strong>
+              {% if p.mrp > p.selling_price %}
+                <span style="text-decoration:line-through;color:#878787;margin-left:6px;">₹{{ p.mrp }}</span>
+                <span style="color:#388E3C;font-weight:700;margin-left:4px;">{{ p.discount_percent }}% Off</span>
+              {% endif %}
+            </td>
+            {% endfor %}
+          </tr>
+          <tr>
+            <td style="padding:10px 12px;font-weight:700;background:#F8FAFC;border:1px solid #E5E7EB;">Brand &amp; Rating</td>
+            {% for p in items %}
+            <td style="padding:10px 12px;border:1px solid #E5E7EB;">
+              {{ p.brand }} · <span class="cc-rating-pill">{{ p.rating_avg }} ★</span> ({{ p.rating_count }})
+            </td>
+            {% endfor %}
+          </tr>
+          <tr>
+            <td style="padding:10px 12px;font-weight:700;background:#F8FAFC;border:1px solid #E5E7EB;">Clickcart Assured</td>
+            {% for p in items %}
+            <td style="padding:10px 12px;border:1px solid #E5E7EB;">
+              {% if p.is_assured %}<span class="cc-assured-badge">✓ Yes, Quality Checked</span>{% else %}Standard Seller{% endif %}
+            </td>
+            {% endfor %}
+          </tr>
+          <tr>
+            <td style="padding:10px 12px;font-weight:700;background:#F8FAFC;border:1px solid #E5E7EB;">Warranty &amp; Returns</td>
+            {% for p in items %}
+            <td style="padding:10px 12px;border:1px solid #E5E7EB;">
+              {{ p.warranty_summary }}<br />
+              <span style="color:#6B7280;font-size:12px;">{{ p.return_policy_days }}-Day Replacement</span>
+            </td>
+            {% endfor %}
+          </tr>
+          {% for sk in spec_keys %}
+          <tr>
+            <td style="padding:10px 12px;font-weight:700;background:#F8FAFC;border:1px solid #E5E7EB;">{{ sk }}</td>
+            {% for p in items %}
+            <td style="padding:10px 12px;border:1px solid #E5E7EB;">
+              {% for k, v in p.specifications.items %}{% if k == sk %}{{ v }}{% endif %}{% endfor %}
+            </td>
+            {% endfor %}
+          </tr>
+          {% endfor %}
+          <tr>
+            <td style="padding:10px 12px;font-weight:700;background:#F8FAFC;border:1px solid #E5E7EB;">Action</td>
+            {% for p in items %}
+            <td style="padding:10px 12px;border:1px solid #E5E7EB;">
+              <form action="{% url 'cart_add' p.id %}" method="post" style="margin:0;">
+                {% csrf_token %}
+                <input type="hidden" name="redirect_to" value="cart" />
+                <button type="submit" class="cc-btn cc-btn-amber cc-btn-sm" style="width:100%;">Add to Cart</button>
+              </form>
+            </td>
+            {% endfor %}
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div style="padding:46px 20px;text-align:center;">
+      <h2 style="margin:0 0 8px;">Your Compare List is Empty</h2>
+      <p style="color:#6B7280;margin:0 0 16px;">Click the ⚖ button on any product card to compare up to 4 items side by side.</p>
+      <a href="{% url 'product_list' %}" class="cc-btn cc-btn-blue">Browse Products</a>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

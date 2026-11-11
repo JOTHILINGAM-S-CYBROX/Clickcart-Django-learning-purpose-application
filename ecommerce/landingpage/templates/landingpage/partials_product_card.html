@@ -1,0 +1,58 @@
+{% load static %}
+<div class="cc-prod-card">
+  <button
+    type="button"
+    class="cc-wish-float {% if p.id in wishlist_product_ids %}active{% endif %}"
+    data-wish-url="{% url 'wishlist_toggle' p.id %}"
+    title="Add to Wishlist"
+  >
+    {% if p.id in wishlist_product_ids %}♥{% else %}♡{% endif %}
+  </button>
+
+  <a href="{% url 'product_detail' p.slug %}" class="cc-prod-img-wrap">
+    <img src="{% static p.primary_image %}" alt="{{ p.title }}" />
+  </a>
+
+  <div class="cc-prod-brand">{{ p.brand }}</div>
+
+  <a href="{% url 'product_detail' p.slug %}" class="cc-prod-title" title="{{ p.title }}">
+    {{ p.title }}
+  </a>
+
+  <div class="cc-rating-row">
+    <span class="cc-rating-pill">{{ p.rating_avg }} ★</span>
+    <span class="cc-rating-count">({{ p.rating_count }})</span>
+    {% if p.is_assured %}
+      <span class="cc-assured-badge">✓ Assured</span>
+    {% endif %}
+  </div>
+
+  <div class="cc-price-row">
+    <span class="cc-price">₹{{ p.selling_price }}</span>
+    {% if p.discount_percent > 0 %}
+      <span class="cc-mrp">₹{{ p.mrp }}</span>
+      <span class="cc-discount">{{ p.discount_percent }}% off</span>
+    {% endif %}
+  </div>
+
+  <div style="font-size:11.5px;color:#388E3C;font-weight:600;margin-top:4px;">
+    {% if p.is_fast_delivery %}Free delivery by {{ p.estimated_delivery_str }}{% else %}Delivery in {{ p.delivery_days }} days{% endif %}
+  </div>
+
+  <div class="cc-card-actions">
+    <form action="{% url 'cart_add' p.id %}" method="post" style="flex:1;display:flex;">
+      {% csrf_token %}
+      <input type="hidden" name="next" value="{{ request.get_full_path }}" />
+      <button type="submit" class="cc-btn cc-btn-amber cc-btn-sm" style="width:100%;">Add to Cart</button>
+    </form>
+    <button
+      type="button"
+      class="cc-btn cc-btn-outline cc-btn-sm {% if p.id in compare_ids %}active{% endif %}"
+      data-compare-url="{% url 'compare_toggle' p.id %}"
+      title="Compare Product"
+    >
+      ⇄
+    </button>
+  </div>
+</div>
+

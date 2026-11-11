@@ -1,0 +1,235 @@
+{% extends 'landingpage/base.html' %}
+{% load static %}
+
+{% block title %}Shopping Cart ({{ summary.item_count }}) | Clickcart{% endblock %}
+
+{% block content %}
+<div class="cc-container">
+  <div class="cc-two-col">
+
+    <!-- Left: Cart Items & Saved For Later -->
+    <div>
+      <div class="cc-card">
+        <div class="cc-section-head">
+          <h2 class="cc-section-title">My Cart ({{ summary.item_count }})</h2>
+          <button type="button" data-open-pincode class="cc-btn cc-btn-outline cc-btn-sm">
+            📍 Deliver to: {{ selected_pincode }} ({{ selected_pincode_info.city }})
+          </button>
+        </div>
+
+        {% if summary.items %}
+          {% for item in summary.items %}
+          <div style="display:flex;gap:16px;padding:18px 20px;border-bottom:1px solid #F0F0F0;flex-wrap:wrap;">
+            <a href="{% url 'product_detail' item.product.slug %}" style="width:104px;height:104px;flex-shrink:0;display:flex;align-items:center;justify-content:center;border:1px solid #F3F4F6;border-radius:4px;padding:6px;">
+              <img src="{% static item.product.primary_image %}" alt="{{ item.product.title }}" style="max-height:100%;" />
+            </a>
+            <div style="flex:1;min-width:220px;">
+              <a href="{% url 'product_detail' item.product.slug %}" style="font-weight:600;font-size:15px;color:#212121;">{{ item.product.title }}</a>
+              {% if item.variant_label %}
+                <div style="font-size:12.5px;color:#666;margin-top:2px;">Variant: {{ item.variant_label }}</div>
+              {% endif %}
+              <div style="font-size:12px;color:#878787;margin-top:2px;">
+                Seller: {{ item.product.seller_name }} {% if item.product.is_assured %}<span class="cc-assured-badge" style="margin-left:6px;">✓ Assured</span>{% endif %}
+              </div>
+
+              <div style="display:flex;align-items:baseline;gap:10px;margin-top:8px;">
+                <span style="font-size:18px;font-weight:700;">₹{{ item.line_total }}</span>
+                {% if item.line_mrp > item.line_total %}
+                  <span style="font-size:13px;color:#878787;text-decoration:line-through;">₹{{ item.line_mrp }}</span>
+                  <span style="font-size:13px;color:#388E3C;font-weight:700;">{{ item.product.discount_percent }}% Off</span>
+                {% endif %}
+              </div>
+
+              {% if item.product.is_exchange_available %}
+              <form action="{% url 'cart_update' item.item_id %}" method="post" style="margin-top:8px;">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="toggle_exchange" />
+                <button type="submit" class="cc-btn cc-btn-outline cc-btn-sm" style="{% if item.with_exchange %}border-color:#2874F0;background:#EFF6FF;color:#2874F0;{% endif %}">
+                  {% if item.with_exchange %}✓ Exchange Applied (-₹{{ item.exchange_discount }}){% else %}+ Add Exchange Offer{% endif %}
+                </button>
+              </form>
+              {% endif %}
+
+              <!-- Quantity Stepper & Actions -->
+              <div style="display:flex;align-items:center;gap:14px;margin-top:12px;flex-wrap:wrap;">
+                <div style="display:inline-flex;align-items:center;gap:6px;">
+                  <form action="{% url 'cart_update' item.item_id %}" method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="dec" />
+                    <button type="submit" style="width:28px;height:28px;border-radius:50%;border:1px solid #C2C2C2;background:#FFF;cursor:pointer;font-weight:700;">−</button>
+                  </form>
+                  <span style="min-width:28px;text-align:center;font-weight:700;">{{ item.quantity }}</span>
+                  <form action="{% url 'cart_update' item.item_id %}" method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="inc" />
+                    <button type="submit" style="width:28px;height:28px;border-radius:50%;border:1px solid #C2C2C2;background:#FFF;cursor:pointer;font-weight:700;">+</button>
+                  </form>
+                </div>
+
+                <form action="{% url 'cart_update' item.item_id %}" method="post">
+                  {% csrf_token %}
+                  <input type="hidden" name="action" value="save_for_later" />
+                  <button type="submit" style="background:none;border:none;font-weight:700;font-size:13px;cursor:pointer;color:#212121;">SAVE FOR LATER</button>
+                </form>
+
+                <form action="{% url 'cart_update' item.item_id %}" method="post">
+                  {% csrf_token %}
+                  <input type="hidden" name="action" value="remove" />
+                  <button type="submit" style="background:none;border:none;font-weight:700;font-size:13px;cursor:pointer;color:#D32F2F;">REMOVE</button>
+                </form>
+              </div>
+            </div>
+            <div style="font-size:12.5px;color:#388E3C;font-weight:600;">
+              Delivery by {{ selected_pincode_info.estimated_date }}
+            </div>
+          </div>
+          {% endfor %}
+
+          <div style="padding:14px 20px;display:flex;justify-content:flex-end;background:#FFF;box-shadow:0 -2px 8px rgba(0,0,0,0.06);">
+            <a href="{% url 'checkout' %}" class="cc-btn cc-btn-orange cc-btn-lg" style="min-width:220px;">Place Order</a>
+          </div>
+        {% else %}
+          <div style="text-align:center;padding:56px 20px;">
+            <div style="font-size:48px;margin-bottom:10px;">🛒</div>
+            <h3 style="margin:0 0 8px;">Your Clickcart cart is empty!</h3>
+            <p style="color:#666;margin:0 0 18px;">Add items to it now and unlock bank offers & SuperCoins.</p>
+            <a href="{% url 'product_list' %}" class="cc-btn cc-btn-blue">Shop Now</a>
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- Saved For Later -->
+      {% if summary.saved_items %}
+      <div class="cc-card">
+        <div class="cc-section-head">
+          <h3 class="cc-section-title" style="font-size:16px;">Saved For Later ({{ summary.saved_items|length }})</h3>
+        </div>
+        {% for s in summary.saved_items %}
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px 20px;border-bottom:1px solid #F0F0F0;flex-wrap:wrap;">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <img src="{% static s.product.primary_image %}" alt="" style="width:54px;height:54px;object-fit:contain;" />
+            <div>
+              <a href="{% url 'product_detail' s.product.slug %}" style="font-weight:600;">{{ s.product.title }}</a>
+              <div style="font-size:13px;font-weight:700;margin-top:2px;">₹{{ s.unit_price }}</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <form action="{% url 'cart_update' s.item_id %}" method="post">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="move_to_cart" />
+              <button type="submit" class="cc-btn cc-btn-blue cc-btn-sm">Move to Cart</button>
+            </form>
+            <form action="{% url 'cart_update' s.item_id %}" method="post">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="remove_saved" />
+              <button type="submit" class="cc-btn cc-btn-outline cc-btn-sm">Remove</button>
+            </form>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Right: Price Summary, Coupons & SuperCoins -->
+    <div class="cc-sticky-summary">
+      <div class="cc-card" style="padding:16px 20px;">
+        <div style="font-size:14px;font-weight:700;color:#878787;text-transform:uppercase;padding-bottom:10px;border-bottom:1px solid #F0F0F0;">Price Details</div>
+
+        <div class="cc-price-line">
+          <span>Price ({{ summary.item_count }} items)</span>
+          <span>₹{{ summary.total_mrp }}</span>
+        </div>
+        <div class="cc-price-line">
+          <span>Discount</span>
+          <span style="color:#388E3C;font-weight:600;">− ₹{{ summary.product_discount }}</span>
+        </div>
+        {% if summary.exchange_discount > 0 %}
+        <div class="cc-price-line">
+          <span>Exchange Bonus</span>
+          <span style="color:#388E3C;font-weight:600;">− ₹{{ summary.exchange_discount }}</span>
+        </div>
+        {% endif %}
+        {% if summary.coupon_discount > 0 %}
+        <div class="cc-price-line">
+          <span>Coupon ({{ summary.coupon_code }})</span>
+          <span style="color:#388E3C;font-weight:600;">− ₹{{ summary.coupon_discount }}</span>
+        </div>
+        {% endif %}
+        {% if summary.supercoins_discount > 0 %}
+        <div class="cc-price-line">
+          <span>SuperCoins Redeemed ({{ summary.supercoins_used }})</span>
+          <span style="color:#388E3C;font-weight:600;">− ₹{{ summary.supercoins_discount }}</span>
+        </div>
+        {% endif %}
+        <div class="cc-price-line">
+          <span>Platform Fee</span>
+          <span>₹{{ summary.platform_fee }}</span>
+        </div>
+        <div class="cc-price-line">
+          <span>Delivery Charges</span>
+          <span>{% if summary.delivery_fee == 0 %}<span style="color:#388E3C;font-weight:700;">FREE</span>{% else %}₹{{ summary.delivery_fee }}{% endif %}</span>
+        </div>
+
+        <div class="cc-price-total">
+          <span>Total Amount</span>
+          <span>₹{{ summary.payable_total }}</span>
+        </div>
+
+        {% if summary.total_savings > 0 %}
+        <div style="color:#388E3C;font-weight:700;font-size:13px;padding-top:4px;">
+          You will save ₹{{ summary.total_savings }} on this order!
+        </div>
+        {% endif %}
+
+        <!-- Coupons Form -->
+        {% if summary.items %}
+        <div style="margin-top:16px;padding-top:14px;border-top:1px solid #F0F0F0;">
+          <div style="font-weight:700;font-size:13px;margin-bottom:8px;">Apply Promo Coupon</div>
+          <form action="{% url 'cart_coupon' %}" method="post" style="display:flex;gap:6px;">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="apply" />
+            <input type="text" name="code" value="{{ summary.coupon_code }}" placeholder="Enter code (e.g. SAVE10)" class="cc-input" style="padding:7px 10px;text-transform:uppercase;" />
+            <button type="submit" class="cc-btn cc-btn-blue cc-btn-sm">Apply</button>
+          </form>
+          {% if summary.coupon_code %}
+            <form action="{% url 'cart_coupon' %}" method="post" style="margin-top:6px;">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="remove" />
+              <button type="submit" style="background:none;border:none;color:#D32F2F;font-size:12px;font-weight:600;cursor:pointer;padding:0;">Remove {{ summary.coupon_code }}</button>
+            </form>
+          {% endif %}
+          <div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;">
+            {% for c in coupons %}
+              <form action="{% url 'cart_coupon' %}" method="post">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="apply" />
+                <input type="hidden" name="code" value="{{ c.code }}" />
+                <button type="submit" style="background:#EFF6FF;border:1px dashed #2874F0;color:#2874F0;font-size:11px;font-weight:700;padding:3px 7px;border-radius:3px;cursor:pointer;">{{ c.code }}</button>
+              </form>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- SuperCoins Redemption Toggle -->
+        <div style="margin-top:14px;padding-top:12px;border-top:1px solid #F0F0F0;">
+          <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;">
+            <span>🪙 Balance: <strong>{{ cc_user.supercoins }} SuperCoins</strong></span>
+            {% if cc_user.supercoins > 0 %}
+              <form action="{% url 'cart_coupon' %}" method="post">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="toggle_coins" />
+                <button type="submit" class="cc-btn cc-btn-sm {% if cc_user.use_supercoins %}cc-btn-blue{% else %}cc-btn-outline{% endif %}">
+                  {% if cc_user.use_supercoins %}✓ Redeeming{% else %}Use Coins{% endif %}
+                </button>
+              </form>
+            {% endif %}
+          </div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

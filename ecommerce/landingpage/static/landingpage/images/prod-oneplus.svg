@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ECFDF5"/><stop offset="100%" stop-color="#D1FAE5"/></linearGradient>
+    <linearGradient id="scr" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#059669"/><stop offset="100%" stop-color="#10B981"/></linearGradient>
+  </defs>
+  <rect width="320" height="320" rx="20" fill="url(#bg)"/>
+  <ellipse cx="160" cy="285" rx="75" ry="12" fill="rgba(0,0,0,0.1)"/>
+  <rect x="92" y="34" width="136" height="246" rx="22" fill="#064E3B"/>
+  <rect x="100" y="42" width="120" height="230" rx="16" fill="url(#scr)"/>
+  <rect x="135" y="48" width="50" height="10" rx="5" fill="#0F172A"/>
+  <circle cx="160" cy="145" r="34" fill="rgba(255,255,255,0.18)"/>
+  <text x="160" y="151" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" font-size="14" fill="#FFF">13R 5G</text>
+  <rect x="115" y="210" width="90" height="14" rx="7" fill="rgba(255,255,255,0.28)"/>
+  <rect x="128" y="232" width="64" height="10" rx="5" fill="rgba(255,255,255,0.2)"/>
+</svg>
